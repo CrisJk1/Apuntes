@@ -1,0 +1,86 @@
+\section{Adaptador \texttt{queue}}
+
+\subsection{Introducción}
+\texttt{queue} es un adaptador de contenedor que implementa una \textbf{cola (FIFO - First In, First Out)}.
+Utiliza otro contenedor subyacente (por defecto \texttt{deque}, pero puede ser \texttt{list}) y restringe el acceso a los extremos: inserción por el final y extracción por el frente.
+Es ideal cuando se necesita procesar elementos en el mismo orden en que fueron añadidos.
+
+\subsection{Operaciones importantes}
+
+\subsubsection{Declaración e inicialización}
+\begin{lstlisting}
+#include <queue>
+
+queue<int> q1;                  // cola vacia (usa deque)
+queue<int, list<int>> q2;       // cola con list subyacente
+\end{lstlisting}
+
+\subsubsection{Agregar elemento: \texttt{push()}}
+Añade un elemento al final de la cola. Complejidad O(1).
+\begin{lstlisting}
+queue<int> q;
+q.push(10);
+q.push(20);
+q.push(30); // q: frente[10, 20, 30]final
+\end{lstlisting}
+
+\subsubsection{Acceder al primer elemento: \texttt{front()}}
+Devuelve una referencia al elemento en el frente (no lo elimina).
+\begin{lstlisting}
+if (!q.empty()) {
+    cout << "Frente: " << q.front() << "\n"; // 10
+    q.front() = 99; // se puede modificar
+}
+\end{lstlisting}
+
+\subsubsection{Acceder al último elemento: \texttt{back()}}
+Devuelve una referencia al elemento al final de la cola.
+\begin{lstlisting}
+if (!q.empty()) {
+    cout << "Final: " << q.back() << "\n"; // 30
+    q.back() = 88; // se puede modificar
+}
+\end{lstlisting}
+
+\subsubsection{Eliminar primer elemento: \texttt{pop()}}
+Elimina el elemento del frente. No devuelve su valor.
+\begin{lstlisting}
+if (!q.empty()) {
+    int valor = q.front(); // primero obtener el valor
+    q.pop();               // luego eliminar
+}
+\end{lstlisting}
+
+\subsubsection{Tamaño y estado}
+\begin{lstlisting}
+cout << "size: " << q.size() << "\n";
+if (q.empty()) {
+    cout << "cola vacia\n";
+}
+\end{lstlisting}
+
+\subsubsection{Patrón típico: procesar todos los elementos}
+\begin{lstlisting}
+while (!q.empty()) {
+    int valor = q.front();
+    q.pop();
+    cout << valor << " "; // procesar en orden FIFO
+}
+\end{lstlisting}
+
+\subsubsection{Intercambiar contenidos}
+\begin{lstlisting}
+queue<int> x, y;
+x.push(1); x.push(2);
+y.push(9);
+x.swap(y); // x tiene {9}, y tiene {1,2}
+\end{lstlisting}
+
+\subsection{Complejidad típica}
+\begin{itemize}
+  \item \texttt{push}: O(1)
+  \item \texttt{pop}: O(1)
+  \item \texttt{front}, \texttt{back}: O(1)
+  \item No permite iteración directa ni acceso aleatorio
+\end{itemize}
+

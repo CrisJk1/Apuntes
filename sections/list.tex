@@ -1,0 +1,99 @@
+\section{Contenedor \texttt{list}}
+
+\subsection{Introducción}
+\texttt{list} es un contenedor secuencial que implementa una \textbf{lista doblemente enlazada}.  
+Cada elemento contiene punteros al anterior y al siguiente, lo que permite insertar o eliminar elementos en cualquier posicion en tiempo constante O(1), siempre que se tenga un iterador a esa posicion.  
+A diferencia de \texttt{vector}, no ofrece acceso aleatorio rapido (no se puede usar el operador \texttt{[]}).
+
+\subsection{Operaciones importantes}
+
+\subsubsection{Declaracion e inicializacion}
+\begin{lstlisting}
+#include <list>
+#include <string>
+
+list<int> l1;                 // vacia
+list<int> l2(5, 100);         // 5 elementos con valor 100
+list<int> l3 = {1, 2, 3, 4};  // inicializacion con lista
+list<string> names = {"Ana", "Luis"};
+\end{lstlisting}
+
+\subsubsection{Agregar y eliminar elementos al inicio o final}
+\texttt{push\_front()} y \texttt{push\_back()} permiten insertar rapido al inicio o final.  
+\texttt{pop\_front()} y \texttt{pop\_back()} eliminan esos elementos.
+\begin{lstlisting}
+list<int> l = {2, 3};
+l.push_front(1);   // {1,2,3}
+l.push_back(4);    // {1,2,3,4}
+l.pop_front();     // {2,3,4}
+l.pop_back();      // {2,3}
+\end{lstlisting}
+
+\subsubsection{Acceder al primer y ultimo elemento}
+\begin{lstlisting}
+if (!l.empty()) {
+    cout << "first: " << l.front()
+              << ", last: " << l.back();
+}
+\end{lstlisting}
+
+\subsubsection{Insertar y borrar en posiciones arbitrarias}
+Usando iteradores, se puede insertar o eliminar en cualquier parte en O(1).
+\begin{lstlisting}
+list<int> a = {1,2,4};
+auto it = next(a.begin(), 2); // apunta al 4
+a.insert(it, 3);                   // {1,2,3,4}
+a.erase(next(a.begin()));     // elimina el 2 -> {1,3,4}
+\end{lstlisting}
+
+\subsubsection{Recorrer la lista}
+\begin{lstlisting}
+// range-based for
+for (int x : a) cout << x << ' ';
+
+// iteradores
+for (auto it = a.begin(); it != a.end(); ++it)
+    *it *= 2;
+\end{lstlisting}
+
+\subsubsection{Tamaño y estado}
+\begin{lstlisting}
+cout << "size: " << a.size() << "\n";
+if (a.empty()) cout << "lista vacia\n";
+\end{lstlisting}
+
+\subsubsection{Eliminar elementos especificos}
+\begin{lstlisting}
+list<int> b = {1,2,3,2,4};
+b.remove(2); // elimina todos los valores iguales a 2 -> {1,3,4}
+\end{lstlisting}
+
+\subsubsection{Ordenar, invertir y eliminar duplicados}
+\texttt{sort()}, \texttt{reverse()} y \texttt{unique()} operan en la propia lista.
+\begin{lstlisting}
+list<int> nums = {4,1,3,2,3};
+nums.sort();     // {1,2,3,3,4}
+nums.unique();   // {1,2,3,4}
+nums.reverse();  // {4,3,2,1}
+\end{lstlisting}
+
+\subsubsection{Fusionar dos listas ordenadas}
+\begin{lstlisting}
+list<int> l1 = {1,3,5};
+list<int> l2 = {2,4,6};
+l1.merge(l2); // l1 = {1,2,3,4,5,6}, l2 queda vacia
+\end{lstlisting}
+
+\subsubsection{Intercambiar contenidos}
+\begin{lstlisting}
+list<int> x = {1,2}, y = {9,8};
+x.swap(y); // x = {9,8}, y = {1,2}
+\end{lstlisting}
+
+\subsection{Complejidad tipica}
+\begin{itemize}
+  \item Acceso secuencial: O(n)
+  \item Insercion/eliminacion con iterador: O(1)
+  \item Borrado por valor (\texttt{remove}): O(n)
+  \item Ordenar (\texttt{sort}): O(n log n)
+\end{itemize}

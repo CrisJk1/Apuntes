@@ -1,0 +1,295 @@
+\section{Contenedor \texttt{string}}
+
+\subsection{Introducción}
+\texttt{string} es un contenedor especializado para manejar cadenas de caracteres en C++.
+Internamente es similar a \texttt{vector<char>} pero con operaciones específicas para texto.
+Permite manipulación eficiente de cadenas, crecimiento dinámico y ofrece numerosas funciones para búsqueda, comparación y transformación.
+Es la forma recomendada de trabajar con texto en C++ moderno, reemplazando los arreglos de caracteres estilo C.
+
+\subsection{Operaciones importantes}
+
+\subsubsection{Declaración e inicialización}
+\begin{lstlisting}
+#include <string>
+#include <iostream>
+using namespace std;
+
+string s1;                          // cadena vacia
+string s2 = "Hola";                 // desde literal
+string s3("Mundo");                 // constructor
+string s4(5, 'a');                  // "aaaaa" (5 caracteres 'a')
+string s5 = s2;                     // copia
+string s6(s2, 1, 2);                // subcadena: "ol" (desde pos 1, 2 chars)
+\end{lstlisting}
+
+\subsubsection{Concatenación: \texttt{operator+} y \texttt{append()}}
+\begin{lstlisting}
+string a = "Hola";
+string b = " Mundo";
+string c = a + b;                   // "Hola Mundo"
+c = c + "!";                        // "Hola Mundo!"
+c += " 2024";                       // "Hola Mundo! 2024"
+
+a.append(b);                        // a = "Hola Mundo"
+a.append(3, '.');                   // a = "Hola Mundo..."
+\end{lstlisting}
+
+\subsubsection{Acceso a caracteres: \texttt{operator[]} y \texttt{at()}}
+\begin{lstlisting}
+string s = "Hola";
+char c1 = s[0];                     // 'H' (sin verificacion)
+char c2 = s.at(1);                  // 'o' (con verificacion)
+s[0] = 'h';                         // s = "hola"
+
+try {
+    char c = s.at(10);              // lanza out_of_range
+} catch (const out_of_range& e) {
+    cout << "indice invalido\n";
+}
+\end{lstlisting}
+
+\subsubsection{Primer y último carácter: \texttt{front()} y \texttt{back()}}
+\begin{lstlisting}
+string s = "Texto";
+char primero = s.front();           // 'T'
+char ultimo = s.back();             // 'o'
+s.front() = 't';                    // s = "texto"
+s.back() = 's';                     // s = "textos"
+\end{lstlisting}
+
+\subsubsection{Tamaño: \texttt{size()}, \texttt{length()} y \texttt{empty()}}
+\begin{lstlisting}
+string s = "Hola";
+cout << s.size() << "\n";           // 4
+cout << s.length() << "\n";         // 4 (equivalente a size)
+if (s.empty()) {
+    cout << "cadena vacia\n";
+}
+\end{lstlisting}
+
+\subsubsection{Modificar tamaño: \texttt{resize()} y \texttt{clear()}}
+\begin{lstlisting}
+string s = "Hola";
+s.resize(7, 'x');                   // s = "Holaxx"
+s.resize(3);                        // s = "Hol"
+s.clear();                          // s = "" (vacia)
+\end{lstlisting}
+
+\subsubsection{Insertar texto: \texttt{insert()}}
+\begin{lstlisting}
+string s = "Hola Mundo";
+s.insert(5, "Bello ");              // "Hola Bello Mundo"
+s.insert(0, ">> ");                 // ">> Hola Bello Mundo"
+s.insert(s.length(), " <<");        // agregar al final
+\end{lstlisting}
+
+\subsubsection{Eliminar texto: \texttt{erase()}}
+\begin{lstlisting}
+string s = "Hola Mundo";
+s.erase(5, 6);                      // elimina 6 chars desde pos 5: "Hola"
+s.erase(2);                         // elimina desde pos 2 al final: "Ho"
+
+string s2 = "ABCDEF";
+s2.erase(s2.begin() + 2);           // elimina 'C': "ABDEF"
+\end{lstlisting}
+
+\subsubsection{Reemplazar texto: \texttt{replace()}}
+\begin{lstlisting}
+string s = "Hola Mundo";
+s.replace(5, 5, "Amigo");           // "Hola Amigo" (desde pos 5, 5 chars)
+s.replace(0, 4, "Adios");           // "Adios Amigo"
+\end{lstlisting}
+
+\subsubsection{Buscar texto: \texttt{find()}}
+\begin{lstlisting}
+string s = "Hola Mundo Hola";
+size_t pos = s.find("Mundo");       // pos = 5
+if (pos != string::npos) {
+    cout << "encontrado en pos " << pos << "\n";
+}
+
+pos = s.find("Hola", 1);            // busca desde pos 1: encuentra 11
+pos = s.find('M');                  // busca caracter: pos = 5
+pos = s.find("XYZ");                // no existe: string::npos
+\end{lstlisting}
+
+\subsubsection{Buscar desde el final: \texttt{rfind()}}
+\begin{lstlisting}
+string s = "Hola Mundo Hola";
+size_t pos = s.rfind("Hola");       // ultima ocurrencia: pos = 11
+pos = s.rfind('o');                 // ultima 'o': pos = 13
+\end{lstlisting}
+
+\subsubsection{Buscar primer/último de un conjunto: \texttt{find\_first\_of()} y \texttt{find\_last\_of()}}
+\begin{lstlisting}
+string s = "Hola Mundo 123";
+// Busca primer vocal
+size_t pos = s.find_first_of("aeiou");  // pos = 1 ('o')
+// Busca primer digito
+pos = s.find_first_of("0123456789");    // pos = 11 ('1')
+// Busca ultimo digito
+pos = s.find_last_of("0123456789");     // pos = 13 ('3')
+\end{lstlisting}
+
+\subsubsection{Buscar primer carácter que NO esté en conjunto: \texttt{find\_first\_not\_of()}}
+\begin{lstlisting}
+string s = "   Hola";
+size_t pos = s.find_first_not_of(" "); // pos = 3 (primer no-espacio)
+\end{lstlisting}
+
+\subsubsection{Subcadenas: \texttt{substr()}}
+\begin{lstlisting}
+string s = "Hola Mundo";
+string sub1 = s.substr(5);          // "Mundo" (desde pos 5 hasta el final)
+string sub2 = s.substr(0, 4);       // "Hola" (desde pos 0, 4 chars)
+string sub3 = s.substr(5, 3);       // "Mun"
+\end{lstlisting}
+
+
+\subsubsection{Comparación: \texttt{compare()} y operadores}
+\begin{lstlisting}
+string s1 = "abc";
+string s2 = "abd";
+
+// Usando operadores
+if (s1 == s2) cout << "iguales\n";
+if (s1 < s2) cout << "s1 es menor\n";    // true (orden lexicografico)
+if (s1 != s2) cout << "diferentes\n";
+
+// Usando compare()
+int result = s1.compare(s2);
+// result < 0 si s1 < s2
+// result > 0 si s1 > s2
+// result == 0 si s1 == s2
+\end{lstlisting}
+
+\subsubsection{Conversión a C-string: \texttt{c\_str()} y \texttt{data()}}
+\begin{lstlisting}
+string s = "Hola";
+const char* cstr = s.c_str();       // puntero a arreglo terminado en '\0'
+printf("%s\n", s.c_str());          // para funciones estilo C
+\end{lstlisting}
+
+\subsubsection{Conversión de números a string}
+\begin{lstlisting}
+#include <string>
+
+int num = 42;
+double pi = 3.14159;
+
+string s1 = to_string(num);         // "42"
+string s2 = to_string(pi);          // "3.141590"
+string s3 = to_string(true);        // "1"
+\end{lstlisting}
+
+\subsubsection{Conversión de string a números}
+\begin{lstlisting}
+string s1 = "42";
+string s2 = "3.14";
+string s3 = "123abc";
+
+int num = stoi(s1);                 // 42
+double d = stod(s2);                // 3.14
+long l = stol(s1);                  // 42L
+
+// stoi ignora caracteres no numericos al final
+int n = stoi(s3);                   // 123
+
+// Manejo de errores
+try {
+    int x = stoi("abc");            // lanza invalid_argument
+} catch (const invalid_argument& e) {
+    cout << "conversion invalida\n";
+}
+\end{lstlisting}
+
+
+\subsubsection{Recorrer string}
+\begin{lstlisting}
+string s = "Hola";
+
+// range-based for
+for (char c : s) {
+    cout << c << ' ';               // H o l a
+}
+
+// por indice
+for (size_t i = 0; i < s.size(); ++i) {
+    cout << s[i] << ' ';
+}
+
+// iteradores
+for (auto it = s.begin(); it != s.end(); ++it) {
+    *it = toupper(*it);             // convertir a mayusculas
+}
+\end{lstlisting}
+
+\subsubsection{Transformaciones comunes}
+\begin{lstlisting}
+#include <algorithm>
+#include <cctype>
+
+string s = "Hola Mundo";
+
+// A mayusculas
+transform(s.begin(), s.end(), s.begin(), ::toupper);
+// s = "HOLA MUNDO"
+
+// A minusculas
+transform(s.begin(), s.end(), s.begin(), ::tolower);
+// s = "hola mundo"
+
+// Invertir
+reverse(s.begin(), s.end());
+// s = "odnum aloh"
+\end{lstlisting}
+
+\subsubsection{Eliminar espacios al inicio/final}
+\begin{lstlisting}
+string s = "   Hola Mundo   ";
+
+// Eliminar espacios al inicio
+s.erase(s.begin(), find_if(s.begin(), s.end(), [](unsigned char c) {
+    return !isspace(c);
+}));
+
+// Eliminar espacios al final
+s.erase(find_if(s.rbegin(), s.rend(), [](unsigned char c) {
+    return !isspace(c);
+}).base(), s.end());
+// s = "Hola Mundo"
+\end{lstlisting}
+
+
+\subsubsection{Dividir string (split)}
+\begin{lstlisting}
+#include <sstream>
+#include <vector>
+
+string s = "uno,dos,tres,cuatro";
+vector<string> tokens;
+stringstream ss(s);
+string token;
+
+while (getline(ss, token, ',')) {
+    tokens.push_back(token);
+}
+// tokens = {"uno", "dos", "tres", "cuatro"}
+\end{lstlisting}
+
+\subsubsection{Intercambiar contenidos}
+\begin{lstlisting}
+string s1 = "Hola";
+string s2 = "Mundo";
+s1.swap(s2);                        // s1 = "Mundo", s2 = "Hola"
+\end{lstlisting}
+
+\subsection{Complejidad típica}
+\begin{itemize}
+  \item Acceso por índice: O(1)
+  \item \texttt{find}, \texttt{rfind}: O(n*m) donde n es el tamaño del string y m del patrón
+  \item \texttt{insert}, \texttt{erase}, \texttt{replace}: O(n)
+  \item \texttt{append}, \texttt{+=}: amortizada O(1)
+  \item \texttt{substr}: O(m) donde m es el tamaño de la subcadena
+  \item Conversiones \texttt{stoi}, \texttt{stod}: O(n)
+\end{itemize}

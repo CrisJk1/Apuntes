@@ -1,0 +1,139 @@
+\section{Contenedor \texttt{set}}
+
+\subsection{Introducción}
+\texttt{set} es un contenedor asociativo que almacena elementos \textbf{únicos} en \textbf{orden ordenado}.
+Internamente usa un árbol binario balanceado (típicamente red-black tree), lo que garantiza ordenamiento automático y búsquedas eficientes.
+No permite elementos duplicados. Si se intenta insertar un elemento que ya existe, la operación no tiene efecto.
+Es ideal cuando se necesita mantener elementos únicos ordenados con búsquedas rápidas.
+
+\subsection{Operaciones importantes}
+
+\subsubsection{Declaración e inicialización}
+\begin{lstlisting}
+#include <set>
+#include <string>
+
+set<int> s1;                       // vacio
+set<int> s2 = {3, 1, 4, 1, 5};     // {1, 3, 4, 5} ordenado, sin duplicados
+set<string> nombres = {"Ana", "Luis", "Ana"}; // {"Ana", "Luis"}
+
+// Con comparador personalizado (orden descendente)
+set<int, greater<int>> s3 = {1, 3, 2}; // {3, 2, 1}
+\end{lstlisting}
+
+\subsubsection{Insertar elementos: \texttt{insert()}}
+Inserta un elemento si no existe. Retorna un par: iterador y bool indicando si se insertó. Complejidad O(log n).
+\begin{lstlisting}
+set<int> s;
+auto result = s.insert(10);
+if (result.second) {
+    cout << "insertado\n";
+}
+s.insert(20);
+s.insert(10); // no tiene efecto, 10 ya existe
+
+// Insertar multiples
+s.insert({30, 40, 50});
+\end{lstlisting}
+
+\subsubsection{Buscar elementos: \texttt{find()}}
+Busca un elemento y retorna un iterador. Si no existe, retorna \texttt{end()}. Complejidad O(log n).
+\begin{lstlisting}
+auto it = s.find(20);
+if (it != s.end()) {
+    cout << "encontrado: " << *it << "\n";
+} else {
+    cout << "no encontrado\n";
+}
+\end{lstlisting}
+
+\subsubsection{Contar elementos: \texttt{count()}}
+Retorna 1 si el elemento existe, 0 si no. Complejidad O(log n).
+\begin{lstlisting}
+if (s.count(20)) {
+    cout << "20 existe\n";
+}
+\end{lstlisting}
+
+\subsubsection{Verificar existencia: \texttt{contains()} (C++20)}
+Verifica si un elemento existe (más legible que \texttt{count()}).
+\begin{lstlisting}
+if (s.contains(20)) {
+    cout << "20 existe\n";
+}
+\end{lstlisting}
+
+\subsubsection{Eliminar elementos: \texttt{erase()}}
+Elimina un elemento por valor o por iterador. Complejidad O(log n).
+\begin{lstlisting}
+s.erase(20);        // elimina 20
+s.erase(s.begin()); // elimina primer elemento
+
+auto it = s.find(30);
+if (it != s.end()) {
+    s.erase(it);    // elimina usando iterador
+}
+\end{lstlisting}
+
+\subsubsection{Tamaño y estado}
+\begin{lstlisting}
+cout << "size: " << s.size() << "\n";
+if (s.empty()) {
+    cout << "set vacio\n";
+}
+\end{lstlisting}
+
+\subsubsection{Recorrer el set (siempre ordenado)}
+\begin{lstlisting}
+// range-based for (en orden)
+for (int x : s) {
+    cout << x << ' ';
+}
+
+// iteradores
+for (auto it = s.begin(); it != s.end(); ++it) {
+    cout << *it << ' ';
+}
+
+// iteradores reversos
+for (auto it = s.rbegin(); it != s.rend(); ++it) {
+    cout << *it << ' ';
+}
+\end{lstlisting}
+
+\subsubsection{Primer y último elemento}
+\begin{lstlisting}
+if (!s.empty()) {
+    cout << "min: " << *s.begin() << "\n";
+    cout << "max: " << *s.rbegin() << "\n";
+}
+\end{lstlisting}
+
+\subsubsection{Límites: \texttt{lower\_bound()} y \texttt{upper\_bound()}}
+\texttt{lower\_bound(x)} retorna iterador al primer elemento >= x.
+\texttt{upper\_bound(x)} retorna iterador al primer elemento > x.
+\begin{lstlisting}
+set<int> s = {1, 3, 5, 7, 9};
+auto it1 = s.lower_bound(5);  // apunta a 5
+auto it2 = s.upper_bound(5);  // apunta a 7
+auto it3 = s.lower_bound(4);  // apunta a 5 (>= 4)
+\end{lstlisting}
+
+\subsubsection{Eliminar todos los elementos}
+\begin{lstlisting}
+s.clear(); // elimina todos
+\end{lstlisting}
+
+\subsubsection{Intercambiar contenidos}
+\begin{lstlisting}
+set<int> x = {1, 2, 3}, y = {9, 8};
+x.swap(y); // x = {8, 9}, y = {1, 2, 3}
+\end{lstlisting}
+
+\subsection{Complejidad típica}
+\begin{itemize}
+  \item \texttt{insert}, \texttt{erase}, \texttt{find}, \texttt{count}: O(log n)
+  \item \texttt{lower\_bound}, \texttt{upper\_bound}: O(log n)
+  \item Iteración completa: O(n)
+  \item No permite acceso por índice
+\end{itemize}

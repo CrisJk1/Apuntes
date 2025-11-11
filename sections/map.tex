@@ -1,0 +1,177 @@
+\section{Contenedor \texttt{map}}
+
+\subsection{Introducción}
+\texttt{map} es un contenedor asociativo que almacena pares \textbf{clave-valor} únicos, ordenados por clave.
+Internamente usa un árbol binario balanceado (típicamente red-black tree).
+Cada clave es única y está asociada a un valor. Las claves están ordenadas automáticamente.
+Es ideal para búsquedas rápidas, asociaciones clave-valor y cuando se necesita mantener las claves ordenadas.
+
+\subsection{Operaciones importantes}
+
+
+\subsubsection{Declaración e inicialización}
+\begin{lstlisting}
+#include <map>
+#include <string>
+
+map<string, int> m1;    // vacio
+map<string, int> edades = {
+    {"Ana", 25},
+    {"Luis", 30},
+    {"Pedro", 28}
+}; // ordenado por clave alfabeticamente
+
+// Con comparador personalizado (orden descendente)
+map<int, string, greater<int>> m2;
+\end{lstlisting}
+
+\subsubsection{Insertar elementos: \texttt{insert()} y \texttt{operator[]}}
+\texttt{operator[]} crea la entrada si no existe e inicializa el valor.
+\texttt{insert()} solo inserta si la clave no existe. Complejidad O(log n).
+\begin{lstlisting}
+map<string, int> m;
+
+// Usando operator[] (crea si no existe)
+m["Ana"] = 25;
+m["Luis"] = 30;
+m["Ana"] = 26;  // actualiza valor existente
+
+// Usando insert (no sobrescribe)
+m.insert({"Pedro", 28});
+auto result = m.insert({"Ana", 99}); // no inserta, Ana existe
+if (!result.second) {
+    cout << "Ana ya existe\n";
+}
+
+// Insert con make_pair
+m.insert(make_pair("Maria", 27));
+\end{lstlisting}
+
+\subsubsection{Acceder a valores: \texttt{operator[]} y \texttt{at()}}
+\texttt{operator[]} crea la entrada si no existe.
+\texttt{at()} lanza excepción si la clave no existe.
+\begin{lstlisting}
+cout << m["Ana"] << "\n";       // 26
+cout << m["Carlos"] << "\n";    // crea Carlos con valor 0
+
+try {
+    cout << m.at("Luis") << "\n";  // 30
+    cout << m.at("Inexistente");   // lanza out_of_range
+} catch (const out_of_range& e) {
+    cout << "clave no encontrada\n";
+}
+\end{lstlisting}
+
+
+\subsubsection{Buscar elementos: \texttt{find()}}
+Busca una clave y retorna iterador. Si no existe, retorna \texttt{end()}. Complejidad O(log n).
+\begin{lstlisting}
+auto it = m.find("Ana");
+if (it != m.end()) {
+    cout << it->first << ": " << it->second << "\n";
+} else {
+    cout << "no encontrado\n";
+}
+\end{lstlisting}
+
+\subsubsection{Verificar existencia: \texttt{count()} y \texttt{contains()}}
+\texttt{count()} retorna 1 si existe, 0 si no.
+\texttt{contains()} (C++20) es más legible.
+\begin{lstlisting}
+if (m.count("Ana")) {
+    cout << "Ana existe\n";
+}
+
+if (m.contains("Luis")) {
+    cout << "Luis existe\n";
+}
+\end{lstlisting}
+
+\subsubsection{Eliminar elementos: \texttt{erase()}}
+Elimina por clave o por iterador. Complejidad O(log n).
+\begin{lstlisting}
+m.erase("Pedro");      // elimina por clave
+m.erase(m.begin());    // elimina primer elemento
+
+auto it = m.find("Ana");
+if (it != m.end()) {
+    m.erase(it);       // elimina usando iterador
+}
+\end{lstlisting}
+
+\subsubsection{Tamaño y estado}
+\begin{lstlisting}
+cout << "size: " << m.size() << "\n";
+if (m.empty()) {
+    cout << "map vacio\n";
+}
+\end{lstlisting}
+
+
+\subsubsection{Recorrer el map (ordenado por clave)}
+\begin{lstlisting}
+// range-based for con structured binding (C++17)
+for (const auto& [clave, valor] : m) {
+    cout << clave << ": " << valor << "\n";
+}
+
+// range-based for tradicional
+for (const auto& par : m) {
+    cout << par.first << ": " << par.second << "\n";
+}
+
+// iteradores
+for (auto it = m.begin(); it != m.end(); ++it) {
+    cout << it->first << ": " << it->second << "\n";
+}
+\end{lstlisting}
+
+\subsubsection{Primera y última entrada}
+\begin{lstlisting}
+if (!m.empty()) {
+    auto primero = m.begin();
+    auto ultimo = m.rbegin();
+    cout << "min clave: " << primero->first << "\n";
+    cout << "max clave: " << ultimo->first << "\n";
+}
+\end{lstlisting}
+
+\subsubsection{Límites: \texttt{lower\_bound()} y \texttt{upper\_bound()}}
+\begin{lstlisting}
+map<int, string> m = {{1,"a"}, {3,"c"}, {5,"e"}};
+auto it1 = m.lower_bound(3);  // apunta a {3,"c"}
+auto it2 = m.upper_bound(3);  // apunta a {5,"e"}
+auto it3 = m.lower_bound(2);  // apunta a {3,"c"}
+\end{lstlisting}
+
+\subsubsection{Modificar valores existentes}
+\begin{lstlisting}
+if (m.count("Ana")) {
+    m["Ana"] += 1;  // incrementar
+}
+
+auto it = m.find("Luis");
+if (it != m.end()) {
+    it->second = 35;  // modificar via iterador
+}
+\end{lstlisting}
+
+\subsubsection{Eliminar todos los elementos}
+\begin{lstlisting}
+m.clear();
+\end{lstlisting}
+
+\subsubsection{Intercambiar contenidos}
+\begin{lstlisting}
+map<string, int> x = {{"a",1}, {"b",2}};
+map<string, int> y = {{"z",9}};
+x.swap(y);
+\end{lstlisting}
+
+\subsection{Complejidad típica}
+\begin{itemize}
+  \item \texttt{insert}, \texttt{erase}, \texttt{find}, \texttt{operator[]}, \texttt{at}: O(log n)
+  \item \texttt{lower\_bound}, \texttt{upper\_bound}: O(log n)
+  \item Iteración completa: O(n)
+  \item No permite acceso por índice numérico
+\end{itemize}

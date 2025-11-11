@@ -1,0 +1,55 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{multicol}
+\geometry{
+  margin=0.6in,
+  top=0.7in,
+  bottom=0.7in
+}
+
+\lstset{
+  language=C++,
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  breaklines=true,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray!60},
+  showstringspaces=false,
+  aboveskip=0.5\baselineskip,
+  belowskip=0.5\baselineskip
+}
+
+\title{Apuntes de C++ para Algoritmos y Complejidad}
+\author{Cristian Quintanilla Ponce}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+\setlength{\columnsep}{0.8cm}
+\begin{multicols}{2}
+
+\input{sections/vector}
+\input{sections/list}
+\input{sections/stack}
+\input{sections/queue}
+\input{sections/priority_queue}
+\input{sections/deque}
+\input{sections/set}
+\input{sections/multiset}
+\input{sections/string}
+\input{sections/map}
+\input{sections/algorithms}
+\input{sections/useful}
+
+\end{multicols}
+\end{document}

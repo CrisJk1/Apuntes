@@ -1,0 +1,136 @@
+\section{Contenedor \texttt{multiset}}
+
+\subsection{Introducción}
+\texttt{multiset} es similar a \texttt{set}, pero \textbf{permite elementos duplicados}.
+Mantiene los elementos ordenados automáticamente usando un árbol binario balanceado.
+Los elementos duplicados se almacenan juntos en orden.
+Es ideal cuando se necesita mantener elementos ordenados con posibles repeticiones.
+
+\subsection{Operaciones importantes}
+
+\subsubsection{Declaración e inicialización}
+\begin{lstlisting}
+#include <set>
+
+multiset<int> ms1;                    // vacio
+multiset<int> ms2 = {3, 1, 4, 1, 5};  // {1, 1, 3, 4, 5} permite duplicados
+multiset<int, greater<int>> ms3;      // orden descendente
+\end{lstlisting}
+
+\subsubsection{Insertar elementos: \texttt{insert()}}
+Siempre inserta el elemento (permite duplicados). Retorna iterador al elemento insertado. Complejidad O(log n).
+\begin{lstlisting}
+multiset<int> ms;
+ms.insert(10);
+ms.insert(20);
+ms.insert(10); // se inserta, ahora hay dos 10
+ms.insert(10); // {10, 10, 10, 20}
+
+// Insertar multiples
+ms.insert({30, 20, 30}); // {10, 10, 10, 20, 20, 30, 30}
+\end{lstlisting}
+
+\subsubsection{Buscar elementos: \texttt{find()}}
+Busca un elemento y retorna iterador a una de las ocurrencias. Complejidad O(log n).
+\begin{lstlisting}
+auto it = ms.find(10);
+if (it != ms.end()) {
+    cout << "encontrado: " << *it << "\n";
+}
+\end{lstlisting}
+
+\subsubsection{Contar elementos: \texttt{count()}}
+Retorna el número de ocurrencias del elemento. Complejidad O(log n + k), donde k es el número de ocurrencias.
+\begin{lstlisting}
+cout << "10 aparece " << ms.count(10) << " veces\n"; // 3
+cout << "50 aparece " << ms.count(50) << " veces\n"; // 0
+\end{lstlisting}
+
+\subsubsection{Eliminar elementos: \texttt{erase()}}
+\texttt{erase(valor)} elimina \textbf{todas} las ocurrencias.
+\texttt{erase(iterador)} elimina solo una ocurrencia.
+\begin{lstlisting}
+multiset<int> ms = {1, 2, 2, 2, 3};
+
+// Eliminar todas las ocurrencias de 2
+ms.erase(2);           // {1, 3}
+
+multiset<int> ms2 = {1, 2, 2, 2, 3};
+// Eliminar solo una ocurrencia de 2
+auto it = ms2.find(2);
+if (it != ms2.end()) {
+    ms2.erase(it);     // {1, 2, 2, 3}
+}
+\end{lstlisting}
+
+\subsubsection{Tamaño y estado}
+\begin{lstlisting}
+cout << "size: " << ms.size() << "\n";
+if (ms.empty()) {
+    cout << "multiset vacio\n";
+}
+\end{lstlisting}
+
+\subsubsection{Recorrer el multiset (incluye duplicados)}
+\begin{lstlisting}
+multiset<int> ms = {3, 1, 4, 1, 5, 9, 2, 6, 5};
+// Salida: 1 1 2 3 4 5 5 6 9
+for (int x : ms) {
+    cout << x << ' ';
+}
+\end{lstlisting}
+
+\subsubsection{Primer y último elemento}
+\begin{lstlisting}
+if (!ms.empty()) {
+    cout << "min: " << *ms.begin() << "\n";
+    cout << "max: " << *ms.rbegin() << "\n";
+}
+\end{lstlisting}
+
+\subsubsection{Rango de elementos iguales: \texttt{equal\_range()}}
+Retorna un par de iteradores delimitando todas las ocurrencias de un valor.
+\begin{lstlisting}
+multiset<int> ms = {1, 2, 2, 2, 3};
+auto range = ms.equal_range(2);
+cout << "Ocurrencias de 2: ";
+for (auto it = range.first; it != range.second; ++it) {
+    cout << *it << ' '; // 2 2 2
+}
+\end{lstlisting}
+
+\subsubsection{Límites: \texttt{lower\_bound()} y \texttt{upper\_bound()}}
+\begin{lstlisting}
+multiset<int> ms = {1, 3, 3, 3, 5, 7};
+auto it1 = ms.lower_bound(3);  // apunta al primer 3
+auto it2 = ms.upper_bound(3);  // apunta a 5 (despues de los 3)
+\end{lstlisting}
+
+\subsubsection{Eliminar todos los elementos}
+\begin{lstlisting}
+ms.clear();
+\end{lstlisting}
+
+\subsubsection{Intercambiar contenidos}
+\begin{lstlisting}
+multiset<int> x = {1, 1, 2}, y = {9, 9};
+x.swap(y); // x = {9, 9}, y = {1, 1, 2}
+\end{lstlisting}
+
+\subsection{Complejidad típica}
+\begin{itemize}
+  \item \texttt{insert}, \texttt{find}: O(log n)
+  \item \texttt{erase(valor)}: O(log n + k), donde k es el número de elementos eliminados
+  \item \texttt{erase(iterador)}: O(1) amortizado
+  \item \texttt{count}: O(log n + k), donde k es el número de ocurrencias
+  \item No permite acceso por índice
+\end{itemize}
+
+\subsection{Diferencias con \texttt{set}}
+\begin{itemize}
+  \item Permite elementos duplicados
+  \item \texttt{insert()} siempre inserta (no retorna pair con bool)
+  \item \texttt{count()} puede retornar valores > 1
+  \item \texttt{erase(valor)} elimina todas las ocurrencias
+  \item \texttt{equal\_range()} es útil para procesar duplicados
+\end{itemize}

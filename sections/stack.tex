@@ -1,0 +1,77 @@
+\section{Adaptador \texttt{stack}}
+
+\subsection{Introducción}
+\texttt{stack} es un adaptador de contenedor que implementa una \textbf{pila (LIFO - Last In, First Out)}.
+Utiliza otro contenedor subyacente (por defecto \texttt{deque}, pero puede ser \texttt{vector} o \texttt{list}) y restringe el acceso únicamente al elemento superior.
+Es ideal cuando se necesita procesar elementos en orden inverso al de inserción.
+
+\subsection{Operaciones importantes}
+
+\subsubsection{Declaración e inicialización}
+\begin{lstlisting}
+#include <stack>
+
+stack<int> s1;                      // pila vacia (usa deque)
+stack<int, vector<int>> s2;         // pila con vector subyacente
+stack<int, list<int>> s3;           // pila con list subyacente
+\end{lstlisting}
+
+\subsubsection{Agregar elemento: \texttt{push()}}
+Añade un elemento al tope de la pila. Complejidad O(1).
+\begin{lstlisting}
+stack<int> s;
+s.push(10);
+s.push(20);
+s.push(30); // tope: 30
+\end{lstlisting}
+
+\subsubsection{Acceder al elemento superior: \texttt{top()}}
+Devuelve una referencia al elemento en el tope (no lo elimina).
+\begin{lstlisting}
+if (!s.empty()) {
+    cout << "Tope: " << s.top() << "\n"; // 30
+    s.top() = 99; // se puede modificar el tope
+}
+\end{lstlisting}
+
+\subsubsection{Eliminar elemento superior: \texttt{pop()}}
+Elimina el elemento del tope. No devuelve su valor.
+\begin{lstlisting}
+if (!s.empty()) {
+    int valor = s.top(); // primero obtener el valor
+    s.pop();             // luego eliminar
+}
+\end{lstlisting}
+
+\subsubsection{Tamaño y estado}
+\begin{lstlisting}
+cout << "size: " << s.size() << "\n";
+if (s.empty()) {
+    cout << "pila vacia\n";
+}
+\end{lstlisting}
+
+\subsubsection{Patrón típico: procesar todos los elementos}
+\begin{lstlisting}
+while (!s.empty()) {
+    int valor = s.top();
+    s.pop();
+    cout << valor << " "; // procesar en orden LIFO
+}
+\end{lstlisting}
+
+\subsubsection{Intercambiar contenidos}
+\begin{lstlisting}
+stack<int> x, y;
+x.push(1); x.push(2);
+y.push(9);
+x.swap(y); // x tiene {9}, y tiene {1,2}
+\end{lstlisting}
+
+\subsection{Complejidad típica}
+\begin{itemize}
+  \item \texttt{push}: O(1)
+  \item \texttt{pop}: O(1)
+  \item \texttt{top}: O(1)
+  \item No permite iteración directa ni acceso aleatorio
+\end{itemize}

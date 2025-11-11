@@ -1,0 +1,99 @@
+\section{Adaptador \texttt{priority\_queue}}
+
+\subsection{Introducción}
+\texttt{priority\_queue} es un adaptador de contenedor que implementa una \textbf{cola de prioridad}.
+Los elementos se organizan en un heap (por defecto max-heap), donde el elemento de mayor prioridad siempre está en el tope.
+Utiliza \texttt{vector} como contenedor subyacente por defecto.
+Es ideal cuando se necesita acceso rápido al elemento de mayor (o menor) prioridad.
+
+\subsection{Operaciones importantes}
+
+\subsubsection{Declaración e inicialización}
+\begin{lstlisting}
+#include <queue>
+#include <vector>
+#include <functional>
+
+// max-heap (mayor prioridad = mayor valor)
+priority_queue<int> pq1;
+
+// min-heap (mayor prioridad = menor valor)
+priority_queue<int, vector<int>, greater<int>> pq2;
+
+// con comparador personalizado
+priority_queue<int, vector<int>, less<int>> pq3;
+
+// inicializar desde un rango
+vector<int> v = {3, 1, 4, 1, 5};
+priority_queue<int> pq4(v.begin(), v.end());
+\end{lstlisting}
+
+\subsubsection{Agregar elemento: \texttt{push()}}
+Añade un elemento y mantiene la propiedad del heap. Complejidad O(log n).
+\begin{lstlisting}
+priority_queue<int> pq;
+pq.push(10);
+pq.push(30);
+pq.push(20); // tope: 30 (el mayor)
+\end{lstlisting}
+
+\subsubsection{Acceder al elemento de mayor prioridad: \texttt{top()}}
+Devuelve una referencia constante al elemento en el tope (no lo elimina).
+\begin{lstlisting}
+if (!pq.empty()) {
+    cout << "Mayor: " << pq.top() << "\n"; // 30
+    // NO se puede modificar: pq.top() = 99; // ERROR
+}
+\end{lstlisting}
+
+\subsubsection{Eliminar elemento de mayor prioridad: \texttt{pop()}}
+Elimina el elemento del tope. No devuelve su valor. Complejidad O(log n).
+\begin{lstlisting}
+if (!pq.empty()) {
+    int valor = pq.top(); // primero obtener el valor
+    pq.pop();             // luego eliminar
+}
+\end{lstlisting}
+
+\subsubsection{Tamaño y estado}
+\begin{lstlisting}
+cout << "size: " << pq.size() << "\n";
+if (pq.empty()) {
+    cout << "cola vacia\n";
+}
+\end{lstlisting}
+
+\subsubsection{Patrón típico: procesar por prioridad}
+\begin{lstlisting}
+while (!pq.empty()) {
+    int valor = pq.top();
+    pq.pop();
+    cout << valor << " "; // procesar en orden de prioridad
+}
+\end{lstlisting}
+
+\subsubsection{Min-heap: menor elemento primero}
+\begin{lstlisting}
+priority_queue<int, vector<int>, greater<int>> minHeap;
+minHeap.push(30);
+minHeap.push(10);
+minHeap.push(20);
+cout << minHeap.top(); // 10 (el menor)
+\end{lstlisting}
+
+\subsubsection{Intercambiar contenidos}
+\begin{lstlisting}
+priority_queue<int> x, y;
+x.push(1); x.push(2);
+y.push(9);
+x.swap(y); // x tiene {9}, y tiene {2,1}
+\end{lstlisting}
+
+\subsection{Complejidad típica}
+\begin{itemize}
+  \item \texttt{push}: O(log n)
+  \item \texttt{pop}: O(log n)
+  \item \texttt{top}: O(1)
+  \item Construcción desde rango: O(n)
+  \item No permite iteración directa ni acceso aleatorio
+\end{itemize}

@@ -1,0 +1,260 @@
+\section{Algoritmos de la STL}
+
+\subsection{Introducción}
+La STL proporciona una amplia colección de algoritmos genéricos en \texttt{<algorithm>} y \texttt{<numeric>}.
+Estos algoritmos trabajan con iteradores, permitiendo su uso con cualquier contenedor.
+La mayoría no modifican el tamaño del contenedor, solo sus elementos.
+
+\subsection{Algoritmos de ordenamiento}
+
+\subsubsection{Ordenar: \texttt{sort()}}
+Ordena elementos en orden ascendente. Complejidad O(n log n).
+\begin{lstlisting}
+#include <algorithm>
+#include <vector>
+
+vector<int> v = {4, 2, 5, 1, 3};
+sort(v.begin(), v.end());  // {1, 2, 3, 4, 5}
+
+// Orden descendente
+sort(v.begin(), v.end(), greater<int>());
+
+// Comparador personalizado
+sort(v.begin(), v.end(), [](int a, int b) {
+    return a > b;  // descendente
+});
+\end{lstlisting}
+
+\subsubsection{Ordenar parcialmente: \texttt{partial\_sort()}}
+Ordena los primeros n elementos. Complejidad O(n log k).
+\begin{lstlisting}
+vector<int> v = {5, 2, 8, 1, 9, 3};
+// Ordenar solo los 3 primeros
+partial_sort(v.begin(), v.begin() + 3, v.end());
+// v = {1, 2, 3, ...} (resto sin orden garantizado)
+\end{lstlisting}
+
+\subsubsection{Verificar si está ordenado: \texttt{is\_sorted()}}
+Verifica si un rango está ordenado. Complejidad O(n).
+\begin{lstlisting}
+vector<int> v = {1, 2, 3, 4, 5};
+if (is_sorted(v.begin(), v.end())) {
+    cout << "ordenado\n";
+}
+\end{lstlisting}
+
+\subsection{Algoritmos de búsqueda}
+
+\subsubsection{Búsqueda binaria: \texttt{binary\_search()}}
+Verifica si un elemento existe en un rango \textbf{ordenado}. Complejidad O(log n).
+\begin{lstlisting}
+vector<int> v = {1, 2, 3, 4, 5};
+if (binary_search(v.begin(), v.end(), 3)) {
+    cout << "encontrado\n";
+}
+\end{lstlisting}
+
+\subsubsection{Límites: \texttt{lower\_bound()} y \texttt{upper\_bound()}}
+Búsqueda en rango ordenado. Complejidad O(log n).
+\begin{lstlisting}
+vector<int> v = {1, 2, 4, 4, 4, 5, 7};
+auto it1 = lower_bound(v.begin(), v.end(), 4);  // primer 4
+auto it2 = upper_bound(v.begin(), v.end(), 4);  // despues del ultimo 4
+int count = it2 - it1;  // cantidad de 4s
+\end{lstlisting}
+
+\subsubsection{Buscar elemento: \texttt{find()}}
+Busca la primera ocurrencia de un valor. Complejidad O(n).
+\begin{lstlisting}
+vector<int> v = {1, 2, 3, 4, 5};
+auto it = find(v.begin(), v.end(), 3);
+if (it != v.end()) {
+    cout << "encontrado en posicion " << (it - v.begin()) << "\n";
+}
+\end{lstlisting}
+
+\subsubsection{Buscar con condición: \texttt{find\_if()}}
+Busca el primer elemento que cumple una condición. Complejidad O(n).
+\begin{lstlisting}
+vector<int> v = {1, 2, 3, 4, 5};
+auto it = find_if(v.begin(), v.end(), [](int x) {
+    return x > 3;
+});
+if (it != v.end()) {
+    cout << "primer elemento > 3: " << *it << "\n";  // 4
+}
+\end{lstlisting}
+
+\subsection{Algoritmos de modificación}
+
+\subsubsection{Invertir: \texttt{reverse()}}
+Invierte el orden de los elementos. Complejidad O(n).
+\begin{lstlisting}
+vector<int> v = {1, 2, 3, 4, 5};
+reverse(v.begin(), v.end());  // {5, 4, 3, 2, 1}
+\end{lstlisting}
+
+\subsubsection{Copiar: \texttt{copy()}}
+Copia elementos de un rango a otro. Complejidad O(n).
+\begin{lstlisting}
+vector<int> src = {1, 2, 3};
+vector<int> dst(3);
+copy(src.begin(), src.end(), dst.begin());
+\end{lstlisting}
+
+\subsubsection{Llenar: \texttt{fill()}}
+Asigna un valor a todos los elementos. Complejidad O(n).
+\begin{lstlisting}
+vector<int> v(5);
+fill(v.begin(), v.end(), 42);  // {42, 42, 42, 42, 42}
+\end{lstlisting}
+
+\subsubsection{Transformar: \texttt{transform()}}
+Aplica una función a cada elemento. Complejidad O(n).
+\begin{lstlisting}
+vector<int> v = {1, 2, 3, 4, 5};
+transform(v.begin(), v.end(), v.begin(), [](int x) {
+    return x * 2;
+});  // {2, 4, 6, 8, 10}
+\end{lstlisting}
+
+\subsubsection{Reemplazar: \texttt{replace()}}
+Reemplaza todas las ocurrencias de un valor. Complejidad O(n).
+\begin{lstlisting}
+vector<int> v = {1, 2, 3, 2, 5};
+replace(v.begin(), v.end(), 2, 99);  // {1, 99, 3, 99, 5}
+\end{lstlisting}
+
+\subsubsection{Eliminar duplicados: \texttt{unique()}}
+Elimina duplicados \textbf{consecutivos} (requiere ordenar primero). Complejidad O(n).
+\begin{lstlisting}
+vector<int> v = {1, 2, 2, 3, 3, 3, 4};
+auto it = unique(v.begin(), v.end());
+v.erase(it, v.end());  // {1, 2, 3, 4}
+
+// Patron completo con sort
+vector<int> v2 = {3, 1, 3, 2, 1};
+sort(v2.begin(), v2.end());
+v2.erase(unique(v2.begin(), v2.end()), v2.end());
+\end{lstlisting}
+
+\subsubsection{Rotar: \texttt{rotate()}}
+Rota elementos en un rango. Complejidad O(n).
+\begin{lstlisting}
+vector<int> v = {1, 2, 3, 4, 5};
+rotate(v.begin(), v.begin() + 2, v.end());
+// {3, 4, 5, 1, 2}
+\end{lstlisting}
+
+\subsection{Algoritmos de permutación}
+
+\subsubsection{Siguiente permutación: \texttt{next\_permutation()}}
+Genera la siguiente permutación lexicográfica. Complejidad O(n).
+\begin{lstlisting}
+vector<int> v = {1, 2, 3};
+do {
+    for (int x : v) cout << x << " ";
+    cout << "\n";
+} while (next_permutation(v.begin(), v.end()));
+// Genera: 123, 132, 213, 231, 312, 321
+\end{lstlisting}
+
+\subsubsection{Permutación anterior: \texttt{prev\_permutation()}}
+Genera la permutación lexicográfica anterior.
+\begin{lstlisting}
+vector<int> v = {3, 2, 1};
+prev_permutation(v.begin(), v.end());  // {3, 1, 2}
+\end{lstlisting}
+
+\subsection{Algoritmos de conjunto}
+
+\subsubsection{Unión: \texttt{set\_union()}}
+Une dos rangos ordenados. Complejidad O(n + m).
+\begin{lstlisting}
+vector<int> a = {1, 2, 3, 4};
+vector<int> b = {3, 4, 5, 6};
+vector<int> result;
+set_union(a.begin(), a.end(), 
+          b.begin(), b.end(),
+          back_inserter(result));
+// result = {1, 2, 3, 4, 5, 6}
+\end{lstlisting}
+
+\subsubsection{Intersección: \texttt{set\_intersection()}}
+Encuentra elementos comunes en dos rangos ordenados. Complejidad O(n + m).
+\begin{lstlisting}
+vector<int> a = {1, 2, 3, 4};
+vector<int> b = {3, 4, 5, 6};
+vector<int> result;
+set_intersection(a.begin(), a.end(),
+                 b.begin(), b.end(),
+                 back_inserter(result));
+// result = {3, 4}
+\end{lstlisting}
+
+\subsubsection{Diferencia: \texttt{set\_difference()}}
+Elementos en el primer rango pero no en el segundo. Complejidad O(n + m).
+\begin{lstlisting}
+vector<int> a = {1, 2, 3, 4};
+vector<int> b = {3, 4, 5, 6};
+vector<int> result;
+set_difference(a.begin(), a.end(),
+               b.begin(), b.end(),
+               back_inserter(result));
+// result = {1, 2}
+\end{lstlisting}
+
+\subsection{Algoritmos numéricos}
+
+\subsubsection{Sumar elementos: \texttt{accumulate()}}
+Suma todos los elementos (requiere \texttt{<numeric>}). Complejidad O(n).
+\begin{lstlisting}
+#include <numeric>
+
+vector<int> v = {1, 2, 3, 4, 5};
+int suma = accumulate(v.begin(), v.end(), 0);  // 15
+
+// Con operacion personalizada
+int producto = accumulate(v.begin(), v.end(), 1, 
+                         [](int a, int b) { return a * b; });
+\end{lstlisting}
+
+\subsubsection{Mínimo y máximo: \texttt{min\_element()} y \texttt{max\_element()}}
+Encuentra el elemento mínimo o máximo. Complejidad O(n).
+\begin{lstlisting}
+vector<int> v = {3, 1, 4, 1, 5};
+auto min_it = min_element(v.begin(), v.end());
+auto max_it = max_element(v.begin(), v.end());
+cout << "min: " << *min_it << ", max: " << *max_it << "\n";
+\end{lstlisting}
+
+\subsubsection{Contar elementos: \texttt{count()} y \texttt{count\_if()}}
+Cuenta ocurrencias o elementos que cumplen condición. Complejidad O(n).
+\begin{lstlisting}
+vector<int> v = {1, 2, 3, 2, 5, 2};
+int n = count(v.begin(), v.end(), 2);  // 3
+
+int pares = count_if(v.begin(), v.end(), [](int x) {
+    return x % 2 == 0;
+});  // 3
+\end{lstlisting}
+
+\subsection{Algoritmos de verificación}
+
+\subsubsection{Verificar condición: \texttt{all\_of()}, \texttt{any\_of()}, \texttt{none\_of()}}
+Verifican si todos, alguno o ninguno cumple una condición. Complejidad O(n).
+\begin{lstlisting}
+vector<int> v = {2, 4, 6, 8};
+
+bool todos_pares = all_of(v.begin(), v.end(), [](int x) {
+    return x % 2 == 0;
+});  // true
+
+bool hay_impar = any_of(v.begin(), v.end(), [](int x) {
+    return x % 2 != 0;
+});  // false
+
+bool ninguno_negativo = none_of(v.begin(), v.end(), [](int x) {
+    return x < 0;
+});  // true
+\end{lstlisting}
