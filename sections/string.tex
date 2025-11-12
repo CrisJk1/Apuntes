@@ -263,9 +263,6 @@ s.erase(find_if(s.rbegin(), s.rend(), [](unsigned char c) {
 
 \subsubsection{Dividir string (split)}
 \begin{lstlisting}
-#include <sstream>
-#include <vector>
-
 string s = "uno,dos,tres,cuatro";
 vector<string> tokens;
 stringstream ss(s);
@@ -275,6 +272,33 @@ while (getline(ss, token, ',')) {
     tokens.push_back(token);
 }
 // tokens = {"uno", "dos", "tres", "cuatro"}
+\end{lstlisting}
+
+\subsubsection{Extraer números de una línea con \texttt{stringstream}}
+\begin{lstlisting}
+// Extraer numeros separados por espacios
+string linea = "5 10 100 1000";
+stringstream ss(linea);
+vector<int> numeros;
+int num;
+
+while (ss >> num) {
+    numeros.push_back(num);
+}
+// numeros = {5, 10, 100, 1000}
+
+// Alternativa: extraer numero por numero
+stringstream ss2("42 73 99");
+int a, b, c;
+ss2 >> a >> b >> c;  // a=42, b=73, c=99
+
+// Con diferentes tipos
+string datos = "3.14 100 texto";
+stringstream ss3(datos);
+double pi;
+int entero;
+string palabra;
+ss3 >> pi >> entero >> palabra;  // pi=3.14, entero=100, palabra="texto"
 \end{lstlisting}
 
 \subsubsection{Intercambiar contenidos}
