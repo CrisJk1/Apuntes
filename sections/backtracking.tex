@@ -126,6 +126,37 @@ determina que una solucion parcial no es factible.
 \end{center}
 
 
+En C++ el backtracking se implementa usando recursividad y esete pouede variar dependiendo si el problema a resolver
+importa el orden de los elementos o no. Si este importa sigue esta estructura:
 
+\begin{lstlisting}
+void backtrack(params){
+    if(solucionCompleta){
+        // Procesar solucion completa
+        return;
+    }
+    for(opcion in opcionesPosibles){
+        if(esFactible(opcion)){
+            // Aplicar
+            backtrack(paramsActualizados);
+            // Deshacer
+        }
+    }
+}
+\end{lstlisting}
 
+Si el orden no importa, la estructura cambia ligeramente para evitar generar soluciones repetidas:
 
+\begin{lstlisting}
+void backtrack(params, startIndex){
+    if(solucionCompleta){
+        // Procesar solucion completa
+        return;
+    }
+    for(int i = startIndex; i < opcionesPosibles.size(); i++){
+        // aplicar
+        backtrack(paramsActualizados, i + 1);
+        // deshacer
+    }
+}
+\end{lstlisting}
