@@ -1,0 +1,137 @@
+\newpage
+\section{Algoritmos Greedy}
+
+\subsection{Introducción}
+
+Un algoritmo voraz es un algoritmo que construye un objeto paso a paso, eligiendo en cada paso la mejor opción local. En algunos casos, los algoritmos voraces construyen el mejor objeto globalmente al elegir repetidamente la mejor opción local.
+
+\textbf{No aseguran una solución óptima en todos los casos}.
+
+\subsection{Kruskal con Union-Find}
+Dado un grafo, ¿cual es la cantidad minima de aristas (y las mas baratas), que me permitan conectar todo el grafo, de forma que exista un camino de un nodo a cualquier otro nodo?
+
+\begin{lstlisting}
+struct union_find{
+    vector<int> e;
+    union_find(int n) {e.assign(n, -1);}
+
+    int findSet(int x) {return (e[x] < 0 ? x : e[x] = findSet(e[x]));}
+    bool sameSet(int a, int b) {return findSet(a) == findSet(b);}
+    bool size(int x) {return -e[findSet(x)];}
+
+    bool unionSet(int x, int y){
+        x = findSet(x), y = findSet(y);
+        if(x == y) return 0;
+        if(e[x] > e[y]) swap(x,y);
+        e[x] += e[y], e[y] = x;
+        return 1;
+    }
+};
+
+struct Edge {
+    int u, v, w; // origen, destino, peso
+};
+
+vector<Edge> kruskal(int n, vector<Edge> &edges){
+    // 1. Ordenar aristas por peso
+    sort(edges.begin(), edges.end(), [](const Edge &a, const Edge &b){return a.w < b.w;});
+
+    // 2. Inicializar DSU
+    union_find uf(n);
+    vector<Edge> T;  // MST
+
+    // 3. Recorrer aristas en orden creciente
+    for(const Edge &e : edges){
+        if(uf.findSet(e.u) != uf.findSet(e.v)){
+            // Conecta dos componentes distintas
+            T.push_back(e);
+            uf.unionSet(e.u, e.v);
+        }
+    }
+
+    // 4. Retornar el arbol generador minimo
+    return T;
+}
+\end{lstlisting}
+
+Complejidad Temporal: $O(E \log E)$, donde ordenar aristas domina sobre las operesaciones de DSU que toman $O(\alpha(E))$ \\
+Complejidad Espacial: $O(n)$ para la estructura DSU mas el MST.
+
+\subsection{Problema de Scheduling}
+Se te da una lista de actividades $(s_1, e_1), \ldots, (s_n, e_n)$ denotadas por sus tiempos de inicio y finalizacion. Todas las actividades son igualmente atractivas para ti, y deseas maximizar el numero de actividades que realizas. \\
+Objetivo: Escoger la mayor cantidad de actividades no superpuestas posible.
+
+\begin{lstlisting}
+struct Activity {
+    int s, e; // start, end
+};
+
+vector<Activity> schedule(vector<Activity> &a){
+    // 1. Ordenar por tiempo de finalizacion
+    sort(a.begin(), a.end(), [](const Activity &x, const Activity &y){return x.e < y.e;});
+
+    vector<Activity> chosen;
+
+    if(a.empty()) return chosen;
+
+    // 2. Seleccionar la primera actividad
+    chosen.push_back(a[0]);
+    int last_end = a[0].e;
+
+    // 3. Recorrer el resto y tomar las compatibles
+    for(int i = 1; i < a.size(); i++){
+        if(a[i].s >= last_end){
+            chosen.push_back(a[i]);
+            last_end = a[i].e;
+        }
+    }
+
+    return chosen;
+}
+\end{lstlisting}
+
+
+Complejidad Temporal: $O(n \log n)$ debido a sort. \\
+Complejidad Espacial: $O(n)$ en el peor caso donde todas las actividades son compatibles.
+
+\subsection{Mochila fraccionaria}
+Problema de la mochila clasico donde los objetos pueden ser divididos en partes mas pequeñas. \\
+Objetivo: Maximizar el valor total en la mochila sin exceder su capacidad.
+
+\begin{lstlisting}
+struct Item {
+    double value, weight;
+};
+
+double fractionalKnapsack(double W, vector<Item> &items){
+    // 1. Ordenar por ratio (value/weight)
+    sort(items.begin(), items.end(), [](const Item &a, const Item &b){
+        return (a.value / a.weight) > (b.value / b.weight);});
+
+    double totalValue = 0.0;
+
+    // 2. Llenar la mochila
+    for(const auto &it : items){
+        if(W == 0) break;
+
+        // Si cabe entero
+        if(it.weight <= W){
+            W -= it.weight;
+            totalValue += it.value;
+        }
+        // Tomar fraccion
+        else{
+            double fraction = W / it.weight;
+            totalValue += it.value * fraction;
+            W = 0;
+        }
+    }
+
+    return totalValue;
+}
+\end{lstlisting}
+
+Complejidad Temporal: $O(n \log n)$ debido a sort. \\
+Complejidad Espacial: $O(1)$ si se ordena in-place, $O(\log n)$ en caso contrario.
+
+\subsection{Huffman}

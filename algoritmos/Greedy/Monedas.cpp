@@ -1,0 +1,1 @@
+// Se omite ya que es relativamente sencillo en greddy pero no sirve para todos los problemas

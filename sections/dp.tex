@@ -1,0 +1,117 @@
+\newpage
+\section{Programación Dinámica (DP)}
+
+\subsection{Introducción}
+Es una tecnica algoritmica que divide problemas complejos en subproblemas mas simples. La idea es construir soluciones paso a paso, usando resultados de calculos anteriores.
+
+\subsubsection{Metodologia}
+\begin{itemize}
+    \item Identificar tipo de respuesta: ¿Maximizar, minimizar, contar?
+    \item Definir estado DP: ¿Que variables necesito?
+    \item Establecer recurrencia: ¿Como se relacionan los subproblemas?
+    \item Determinar casos base: ¿Cuando termina la recursion?
+    \item Calcular Complejidad: ¿Es factible en tiempo y espacio?
+    \item Optimizar si es necesario: ¿Se puede reducir espacio o tiempo?
+\end{itemize}
+
+\subsection{Fibonacci}
+Se pueden aplicar dos tecnicas para implementar DP. Memoization (top-down) y Tabulation (bottom-up).\\
+
+\subsubsection{Memoization}
+Memoization guarda los resultados en una tabla mientras se hacen las llamadas
+recursivas.
+\begin{lstlisting}
+vector<long long> dp(101, -1);
+
+long long fib(int n){
+    if(n <= 1) return n;
+    if(dp[n] != -1) return dp[n]; // Ya calculado
+
+    dp[n] = fib(n-1) + fib(n-2);
+    return dp[n];
+}
+\end{lstlisting}
+
+\subsubsection{Tabulation}
+Tabulation construye la solución desde los casos base hacia arriba, sin recursión. Es mas eficiente en memoria.
+\begin{lstlisting}
+long long fib(int n){
+    if(n <= 1) return n;
+
+    long long dp[n+1];
+    dp[0] = 0;
+    dp[1] = 1;
+
+    for(int i = 2; i <= n; i++) dp[i] = dp[i-1] + dp[i-2];
+
+    return dp[n];
+}
+\end{lstlisting}
+
+Complejidad Temporal (Ambos): \(O(n)\)\\
+Complejidad Espacial (Ambos): \(O(n)\)
+
+\subsection{MWIS: Maximum Weight Independent Set}
+Dado un arreglo de pesos, encontrar el subconjunto de elementos no adyacentes con suma maxima.
+
+\begin{lstlisting}
+int mwis(vector<int> &arr){
+    int n = arr.size();
+    if(n == 0) return 0;
+    if(n == 1) return arr[0];
+
+    vector<int> dp(n);
+    dp[0] = arr[0];
+    dp[1] = max(arr[0], arr[1]);
+
+    for(int i = 2; i < n; i++) dp[i] = max(dp[i-1], arr[i] + dp[i-2]);
+
+    return dp[n-1];
+}
+\end{lstlisting}
+Complejidad Temporal: \(O(n)\)\\
+Complejidad Espacial: \(O(n)\)
+
+\subsection{Knapsack 0/1}
+Tienes una mochila con capacidad $W$ y $n$ objetos, cada uno con peso $w[i]$ y valor $v[i]$. Maximiza el valor sin exceder la capacidad.
+
+\begin{lstlisting}
+int knapsack(int W, vector<int> &w, vector<int> &v, int n){
+    vector<vector<int>> dp(n+1, vector<int>(W+1,0));
+
+    for(int i = 1; i <= n; i++){
+        for(int cap = 0; cap <= W; cap++){
+            dp[i][cap] = dp[i-1][cap]; // No tomar
+
+            if(w[i-1] <= cap){ // Si cabe
+                dp[i][cap] = max(dp[i][cap], 
+                                 v[i-1] + dp[i-1][cap - w[i-1]]);}
+        }
+    }
+    return dp[n][W];
+}
+\end{lstlisting}
+Complejidad Temporal: \(O(nW)\)\\
+Complejidad Espacial: \(O(nW)\)
+
+\subsection{Cambio de monedas}
+Dado un conjunto de monedas y una cantidad S , encuentra el minimo numero de monedas necesarias para formar S.
+
+\begin{lstlisting}
+int coinChange(vector<int>& coins, int amount) {
+    vector<int> dp(amount + 1, INT_MAX);
+    dp[0] = 0;
+
+    for(int i = 1; i <= amount; i++){
+        for(int coin : coins){
+            if(coin <= i && dp[i - coin] != INT_MAX){
+                dp[i] = min(dp[i], dp[i - coin] + 1);
+            }
+        }
+    }
+
+    return dp[amount] == INT_MAX ? -1 : dp[amount];
+}
+\end{lstlisting}
+Complejidad Temporal: \(O(nS)\)\\
+Complejidad Espacial: \(O(S)\)
