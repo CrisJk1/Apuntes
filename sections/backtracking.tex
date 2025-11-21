@@ -1,12 +1,5 @@
 \newpage
-\section{Backtracking}
-
-\subsection{Introduccion}
-
-El backtracking es una técnica de diseño de algoritmos para resolver problemas 
-combinatorios.
-Consiste en construir soluciones parciales y retroceder cuando se determina que 
-una solución parcial no puede llevar a una solución completa válida.
+\section{Backtracking y fuerza bruta}
 
 \subsection{Fuerza Bruta (Brute Force)}
 
@@ -25,21 +18,20 @@ específica.
     $[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]$
 \end{center}
 
-En C++ se puede usar la función \textbf{next\_permutation} para generar todas las 
-permutaciones de un conjunto.\\
+Utiliza \texttt{next\_permutation()} para generar todas las permutaciones de un vector. El vector debe estar inicialmente ordenado. \\
 
 \begin{lstlisting}
-/*Generar todas las permutaciones de conjunto*/
 vector<int> conjunto = {1,2,3,4};
 do {
     // Imprime la permutacion actual 
     for (auto numero : conjunto)
-        cout << c << " ";
-        cout << endl;
+        cout << numero << " ";
+    cout << endl;
 } while(next_permutation(conjunto.begin(),conjunto.end()));
-// Tiempo: O(n!)
-// Espacio: O(1)
 \end{lstlisting}
+
+Complejidad Temporal: \(O(n \times n!)\)\\
+Complejidad Espacial: \(O(1)\)
 
 \newcolumn
 \subsubsection*{Subconjuntos}
@@ -65,38 +57,38 @@ elemento pertenece o no al subconjunto.
 \end{center}
 
 \begin{lstlisting}
-/* Suma de cada subconjunto */
-int n = 3;
-vector<int> arr = {1,2,3};
-vector<int> sum(1<<n);
-for (int i = 0; i < (1<<n); i++){
-    int num = 0;
-    for (int j = 0; j < n; j++){
-        if (i&(1<<j)){
-            
+void mask(vector<char> &arr){
+    int n = arr.size();
+    int total_subset = 1 << n;  // 2^n subconjuntos
+
+    for(int i = 0; i < total_subset; i++){
+        for(int j = 0; j < n; j++){
+            if(i & (1 << j)){
+                cout << arr[j];
+                if(j < n - 1) cout << " ";
+            }
         }
+        cout << endl;
     }
-    sum[i] = num;
 }
-// Tiempo: O(2^n)
-// Espacio : O(1)
 \end{lstlisting}
+Complejidad Temporal: \(O(n \times 2^n)\)\\
+Complejidad Espacial: \(O(1)\)
 \end{multicols}
 
 \textbf{La cantidad de suconjuntos de un conjunto de tamaño n es $2^n$ y la cantidad de
 permutaciones es $n!$.}
 
-\subsection{BackTracking}
+\subsection{Backtracking}
 
-Como se menciono antes el backtracking es una tecnica para resolver problemas
-combinatorios. Consiste en construir soluciones parciales y retroceder cuando se
-determina que una solucion parcial no es factible.
-
-
+El backtracking es una técnica de diseño de algoritmos para resolver problemas 
+combinatorios.
+Consiste en construir soluciones parciales y retroceder cuando se determina que 
+una solucion parcial no puede llevar a una solucion completa válida.
 
 \begin{center}
     \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
-    \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1][h!]
+    \begin{tikzpicture}[x=0.5pt,y=0.5pt,yscale=-0.8,xscale=0.8][h!]
     %uncomment if require: \path (0,300); %set diagram left start at 0, and has height of 300
 
     %Flowchart: Connector [id:dp4042306815169395] 
@@ -126,37 +118,149 @@ determina que una solucion parcial no es factible.
 \end{center}
 
 
-En C++ el backtracking se implementa usando recursividad y esete pouede variar dependiendo si el problema a resolver
-importa el orden de los elementos o no. Si este importa sigue esta estructura:
+En C++ esta es la estructura general para abordar problemas con backtracking:
 
 \begin{lstlisting}
-void backtrack(params){
-    if(solucionCompleta){
-        // Procesar solucion completa
+bool backtrack(Estado actual, Solucion parcial) {
+    // 1. CASO BASE - Verificar si llegamos a una solucion
+    if (esSolucionCompleta(actual)) {
+        procesarSolucion(parcial);
+        return true; // o false si buscas todas las soluciones
+    }
+    
+    // 2. PODAR - Verificar si vale la pena continuar
+    if (!esPrometedor(actual)) {
+        return false;
+    }
+    
+    // 3. GENERAR CANDIDATOS - Explorar todas las opciones
+    for (cada candidato posible) {
+        // 4. HACER - Aplicar el candidato
+        aplicarCandidato(actual, candidato, parcial);
+        
+        // 5. RECURSION - Explorar este camino
+        if (backtrack(nuevoEstado, parcial)) {
+            return true; // Si solo buscas una solucion
+        }
+        
+        // 6. DESHACER - Retroceder (backtrack)
+        deshacerCandidato(actual, candidato, parcial);
+    }
+    
+    // 7. RETORNAR - No se encontro solucion en esta rama
+    return false;
+}
+\end{lstlisting}
+
+\subsection{Prefiprimos}
+Se busca contar la cantidad de números de tres dígitos, de forma que cumplen que cada prefijo es también un número primo.
+
+\begin{lstlisting}
+bool esPrimo(long long n) { // Complejidad O(sqrt{n})
+    if(n <= 1) return false;
+    if(n <= 3) return true;
+    if(n % 2 == 0 || n % 3 == 0) return false;
+    
+    for(long long i = 5; i * i <= n; i += 6) {
+        if(n % i == 0 || n % (i + 2) == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+int prefiprimo(){ // Enfoque backtracking
+    int cnt = 0;
+    for(int a = 1; a <= 9; a++){
+        if(!esPrimo(a)) continue;
+        for(int b = 0; b <= 9; b++){
+            if(!esPrimo(10*a+b)) continue;
+            for(int c = 0; c <= 9; c++){
+                if(!esPrimo(100*a+10*b+c)) continue;
+                cnt++;
+            }
+        }
+    }
+    return cnt;
+}
+\end{lstlisting}
+
+\subsection{N-queens}
+El problema de las N-Reinas consiste en colocar N reinas en un tablero de ajedrez de N*N casillas, de tal manera que ninguna reina pueda atacar a otra.
+
+\begin{lstlisting}
+void backtrack(vector<int>& reinas, 
+               vector<bool>& columnas_ocupadas,
+               vector<bool>& diagonal1_ocupada,
+               vector<bool>& diagonal2_ocupada,
+               int fila, 
+               const int n, 
+               int &count){
+    
+    // Caso base: todas las reinas colocadas
+    if(fila == n){
+        count++;
+
+        // IMPRIMIR LA SOLUCION
+        cout << "Solucion #" << count << ":" << endl;
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < n; j++){
+                if(reinas[i] == j) cout << "Q ";
+                else cout << ". ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+
         return;
     }
-    for(opcion in opcionesPosibles){
-        if(esFactible(opcion)){
-            // Aplicar
-            backtrack(paramsActualizados);
-            // Deshacer
+
+    // Probar cada columna en la fila actual
+    for(int col = 0; col < n; col++){
+        int d1 = fila - col + (n - 1);  // Diagonal der
+        int d2 = fila + col;             // Diagonal izq
+        
+        // Verificar si es seguro colocar reina aqui
+        if(!columnas_ocupadas[col] && !diagonal1_ocupada[d1] && !diagonal2_ocupada[d2]){
+            
+            // ======= HACER =======
+            reinas[fila] = col;
+            columnas_ocupadas[col] = true;
+            diagonal1_ocupada[d1] = true;
+            diagonal2_ocupada[d2] = true;
+            
+            // ======= RECURSION =======
+            backtrack(reinas, columnas_ocupadas, diagonal1_ocupada, diagonal2_ocupada, 
+                      fila + 1, n, count);
+            
+            // ======= DESHACER =======
+            columnas_ocupadas[col] = false;
+            diagonal1_ocupada[d1] = false;
+            diagonal2_ocupada[d2] = false;
         }
     }
 }
-\end{lstlisting}
 
-Si el orden no importa, la estructura cambia ligeramente para evitar generar soluciones repetidas:
+int main(){
+    int n;
+    cin >> n;
 
-\begin{lstlisting}
-void backtrack(params, startIndex){
-    if(solucionCompleta){
-        // Procesar solucion completa
-        return;
-    }
-    for(int i = startIndex; i < opcionesPosibles.size(); i++){
-        // aplicar
-        backtrack(paramsActualizados, i + 1);
-        // deshacer
-    }
+    vector<int> reinas(n, -1); // Pos reina en cada fila
+    vector<bool> columnas_ocupadas(n, false); // n columnas
+    vector<bool> diagonal1_ocupada(2*n - 1, false); // 2n-1 diagonales izq
+    vector<bool> diagonal2_ocupada(2*n - 1, false); // 2n-1 diagonales der
+    
+    int count = 0;
+    
+    backtrack(reinas, columnas_ocupadas, diagonal1_ocupada, 
+             diagonal2_ocupada, 0, n, count);
+    
+    cout << count << endl;
+    
+    return 0;
 }
 \end{lstlisting}
+
+Complejidad Temporal: $O(n!)$\\
+Complejidad Espacial: $O(n)$ (uso de stack por recursion)
+

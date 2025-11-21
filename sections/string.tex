@@ -287,18 +287,9 @@ while (ss >> num) {
 }
 // numeros = {5, 10, 100, 1000}
 
-// Alternativa: extraer numero por numero
-stringstream ss2("42 73 99");
-int a, b, c;
-ss2 >> a >> b >> c;  // a=42, b=73, c=99
-
-// Con diferentes tipos
-string datos = "3.14 100 texto";
-stringstream ss3(datos);
-double pi;
-int entero;
-string palabra;
-ss3 >> pi >> entero >> palabra;  // pi=3.14, entero=100, palabra="texto"
+// Rellenar un vector con numeros automaticamente
+vector<int> num(n);
+for (auto& x : num) cin >> x;
 \end{lstlisting}
 
 \subsubsection{Intercambiar contenidos}

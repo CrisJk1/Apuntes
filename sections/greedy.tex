@@ -1,11 +1,11 @@
 \newpage
 \section{Algoritmos Greedy}
 
-\subsection{Introducción}
+\subsection{Introduccion}
 
-Un algoritmo voraz es un algoritmo que construye un objeto paso a paso, eligiendo en cada paso la mejor opción local. En algunos casos, los algoritmos voraces construyen el mejor objeto globalmente al elegir repetidamente la mejor opción local.
+Un algoritmo voraz es un algoritmo que construye un objeto paso a paso, eligiendo en cada paso la mejor opcion local. En algunos casos, los algoritmos voraces construyen el mejor objeto globalmente al elegir repetidamente la mejor opcion local.
 
-\textbf{No aseguran una solución óptima en todos los casos}.
+\textbf{No aseguran una solucion optima en todos los casos}.
 
 \subsection{Kruskal con Union-Find}
 Dado un grafo, ¿cual es la cantidad minima de aristas (y las mas baratas), que me permitan conectar todo el grafo, de forma que exista un camino de un nodo a cualquier otro nodo?
@@ -135,3 +135,126 @@ Complejidad Temporal: $O(n \log n)$ debido a sort. \\
 Complejidad Espacial: $O(1)$ si se ordena in-place, $O(\log n)$ en caso contrario.
 
 \subsection{Huffman}
+
+Algoritmo de compresión de datos que asigna códigos binarios de longitud variable a los símbolos, basándose en su frecuencia de aparición.
+
+\subsubsection*{Estructura del Nodo y Comparador}
+
+\begin{lstlisting}
+struct Node {
+    char c;                // simbolo (solo en hojas)
+    int freq;              // frecuencia del subarbol
+    Node *left, *right;    // hijos
+
+    Node(char c, int freq) : c(c), freq(freq), left(NULL), right(NULL) {}
+    Node(Node* l, Node* r) : c('\0'), freq(l->freq + r->freq), left(l), right(r) {}
+};
+
+struct Compare {
+    bool operator()(Node* a, Node* b) {
+        return a->freq > b->freq; // min-heap
+    }
+};
+\end{lstlisting}
+
+\subsubsection*{Construcción del Árbol}
+
+\begin{lstlisting}
+Node* buildHuffmanTree(const unordered_map<char, int> &freq) {
+    priority_queue<Node*, vector<Node*>, Compare> F;
+
+    // 1. Crear un arbol para cada simbolo
+    for (auto &p : freq) {
+        F.push(new Node(p.first, p.second));
+    }
+
+    // 2. Fusionar arboles hasta tener uno solo
+    while (F.size() > 1) {
+        Node* T1 = F.top(); F.pop();
+        Node* T2 = F.top(); F.pop();
+        F.push(new Node(T1, T2));
+    }
+
+    return F.top();
+}
+\end{lstlisting}
+
+\begin{multicols}{2}
+\subsubsection*{Generación de Códigos}
+
+\begin{lstlisting}
+void generateCodes(Node* root, 
+                   string code, 
+                   unordered_map<char, string> &mp) {
+    if (!root) return;
+
+    // Hoja: asignar codigo
+    if (!root->left && !root->right) {
+        mp[root->c] = code;
+    }
+
+    generateCodes(root->left,  code + "0", mp);
+    generateCodes(root->right, code + "1", mp);
+}
+\end{lstlisting}
+
+\columnbreak
+
+\subsubsection*{Codificación}
+
+\begin{lstlisting}
+string encode(const string &text, 
+              unordered_map<char,string> &codeMap) {
+    string encoded;
+    for (char c : text) 
+        encoded += codeMap[c];
+    return encoded;
+}
+\end{lstlisting}
+\end{multicols}
+
+\subsubsection*{Decodificación}
+
+\begin{lstlisting}
+string decode(Node* root, const string &encoded) {
+    string result;
+    Node* curr = root;
+
+    for (char bit : encoded) {
+        curr = (bit == '0') ? curr->left : curr->right;
+
+        // Llegamos a una hoja
+        if (!curr->left && !curr->right) {
+            result += curr->c;
+            curr = root; // volver a la raiz
+        }
+    }
+    return result;
+}
+\end{lstlisting}
+
+\subsubsection*{Ejemplo de Uso}
+
+\begin{lstlisting}
+int main() {
+    string text = "huffman example";
+
+    // Contar frecuencias
+    unordered_map<char,int> freq;
+    for (char c : text) freq[c]++;
+
+    // Construir arbol y generar codigos
+    Node* root = buildHuffmanTree(freq);
+    unordered_map<char,string> codeMap;
+    generateCodes(root, "", codeMap);
+
+    // Codificar y decodificar
+    string encoded = encode(text, codeMap);
+    string decoded = decode(root, encoded);
+
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Complejidad Temporal:} $O(n \log n)$. Se inserta n nodos en la priority\_queue $O(n \log n)$ en total. Cada iteracion extraen dos nodos minimos con pop() $O(2(n-1) \cdot \log n) = O(n \log n)$. Cada fusion inserta un nuevo nodo $O((n-1) \log n) = O(n \log n)$. Todo lo demas es $O(1)$\\
+\textbf{Complejidad Espacial:} $O(n)$. El arbol final tiene $2n-1$ nodos, priority\_queue tiene a lo mas $n$ nodos.

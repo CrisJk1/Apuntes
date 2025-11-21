@@ -12,6 +12,18 @@ void backtrack(vector<int>& reinas,
     // Caso base: todas las reinas colocadas
     if(fila == n){
         count++;
+
+        // IMPRIMIR LA SOLUCION
+        cout << "Solucion #" << count << ":" << endl;
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < n; j++){
+                if(reinas[i] == j) cout << "Q ";
+                else cout << ". ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+
         return;
     }
 

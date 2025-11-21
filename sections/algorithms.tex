@@ -146,26 +146,6 @@ rotate(v.begin(), v.begin() + 2, v.end());
 // {3, 4, 5, 1, 2}
 \end{lstlisting}
 
-\subsection{Algoritmos de permutación}
-
-\subsubsection{Siguiente permutación: \texttt{next\_permutation()}}
-Genera la siguiente permutación lexicográfica. Complejidad O(n).
-\begin{lstlisting}
-vector<int> v = {1, 2, 3};
-do {
-    for (int x : v) cout << x << " ";
-    cout << "\n";
-} while (next_permutation(v.begin(), v.end()));
-// Genera: 123, 132, 213, 231, 312, 321
-\end{lstlisting}
-
-\subsubsection{Permutación anterior: \texttt{prev\_permutation()}}
-Genera la permutación lexicográfica anterior.
-\begin{lstlisting}
-vector<int> v = {3, 2, 1};
-prev_permutation(v.begin(), v.end());  // {3, 1, 2}
-\end{lstlisting}
-
 \subsection{Algoritmos de conjunto}
 
 \subsubsection{Unión: \texttt{set\_union()}}
