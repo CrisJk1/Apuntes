@@ -1,4 +1,3 @@
-\newpage
 \section{Algoritmos Greedy}
 
 \subsection{Introduccion}
@@ -7,8 +6,9 @@ Un algoritmo voraz es un algoritmo que construye un objeto paso a paso, eligiend
 
 \textbf{No aseguran una solucion optima en todos los casos}.
 
+\newpage
 \subsection{Kruskal con Union-Find}
-Dado un grafo, ¿cual es la cantidad minima de aristas (y las mas baratas), que me permitan conectar todo el grafo, de forma que exista un camino de un nodo a cualquier otro nodo?
+Dado un grafo, ¿cual es la cantidad minima de aristas (y las mas baratas), que me permitan conectar todo el grafo, de forma que exista un camino de un nodo a cualquier otro nodo? Este algoritmo es mejor para grafos dispersos.
 
 \begin{lstlisting}
 struct union_find{
@@ -51,11 +51,339 @@ vector<Edge> kruskal(int n, vector<Edge> &edges){
 
     // 4. Retornar el arbol generador minimo
     return T;
+\end{lstlisting}
+\begin{lstlisting}
+int main(){
+    int n = 13;  // cantidad de vertices
+    vector<Edge> edges = {
+        {1,2,1}, {1,3,3}, {2,3,6}, {2,5,7},
+        {2,6,5}, {3,4,1}, {3,5,4}, {4,5,9},
+        {5,6,8}, {5,7,6}, {5,8,12}, {6,7,7},
+        {7,8,2}
+    };
+
+    vector<Edge> mst = kruskal(n, edges);
+
+    cout << "Aristas del MST:\n";
+    for(auto &e : mst)
+        cout << e.u << " - " << e.v << "  peso = " << e.w << "\n";
+}
 }
 \end{lstlisting}
 
-Complejidad Temporal: $O(E \log E)$, donde ordenar aristas domina sobre las operesaciones de DSU que toman $O(\alpha(E))$ \\
-Complejidad Espacial: $O(n)$ para la estructura DSU mas el MST.
+Complejidad Temporal: La fase dominante del algoritmo es la ordenación de las aristas por peso, lo que requiere $O(E \log E)$. Las operaciones posteriores de \texttt{find} y \texttt{union} en la estructura Union-Find tienen costo amortizado $O(1)$, por lo que procesar las $E$ aristas añade sólo $O(E)$. En consecuencia, la complejidad temporal total es $O(E \log E)$. \\
+
+Complejidad Espacial: El algoritmo almacena todas las aristas del grafo, lo que requiere $O(E)$, y utiliza una estructura Union-Find con un vector de tamaño $V$, lo que aporta $O(V)$. Por lo tanto, el uso total de memoria es $O(V + E)$.
+
+\subsection{Prim}
+Mismo contexto que Kruskal, pero este algoritmo es mejor para grafos densos y soporta inicio aleatorio.
+
+\begin{lstlisting}
+struct Arista {
+    int destino;
+    long long peso;
+};
+
+// Par: {peso, vertice}
+struct Nodo {
+    long long peso;
+    int vertice;
+    bool operator>(const Nodo& otro) const {
+        return peso > otro.peso; // Min-heap
+    }
+};
+
+// Funcion mejorada de Prim con inicio aleatorio
+pair<long long, vector<pair<int, int>>> prim(int n, vector<vector<Arista>>& grafo, int inicio = -1) {
+    // Si no se especifica inicio, elegir uno aleatorio
+    if (inicio == -1) {
+        srand(time(nullptr));
+        inicio = rand() % n;
+    }
+    
+    vector<bool> enMST(n, false);
+    priority_queue<Nodo, vector<Nodo>, greater<Nodo>> pq;
+    
+    vector<pair<int, int>> aristasMST;
+    vector<int> padre(n, -1);
+    long long pesoTotal = 0;
+    
+    // Iniciar desde el vertice elegido
+    pq.push({0, inicio});
+    padre[inicio] = inicio;
+    
+    int aristas_procesadas = 0;
+    
+    while (!pq.empty() && aristas_procesadas < n - 1) {
+        Nodo actual = pq.top();
+        pq.pop();
+        
+        int v = actual.vertice;
+        long long peso = actual.peso;
+        
+        if (enMST[v]) continue;
+        
+        // Agregar vertice al MST
+        enMST[v] = true;
+        pesoTotal += peso;
+        
+        // Guardar la arista (excepto el nodo inicial)
+        if (v != inicio) {
+            aristasMST.push_back({padre[v], v});
+            aristas_procesadas++;
+        }
+        
+        // Buscar vecino de menor costo no visitado
+        for (const Arista& e : grafo[v]) {
+            if (!enMST[e.destino]) {
+                pq.push({e.peso, e.destino});
+                padre[e.destino] = v;
+            }
+        }
+    }
+    
+    return {pesoTotal, aristasMST};
+}
+\end{lstlisting}
+\newpage
+\begin{lstlisting}
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    
+    int n, m;
+    cin >> n >> m;
+    
+    vector<vector<Arista>> grafo(n);
+    
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        long long w;
+        cin >> u >> v >> w;
+        grafo[u].push_back({v, w});
+        grafo[v].push_back({u, w});
+    }
+    
+    auto [peso, aristas] = prim(n, grafo);
+    cout << "Peso MST: " << peso << endl;
+    cout << "Aristas:" << endl;
+    for (auto [u, v] : aristas) {
+        cout << u << " - " << v << endl;
+    }
+    
+    return 0;
+}
+\end{lstlisting}
+
+Complejidad Temporal: El algoritmo realiza $O(E)$ inserciones en la cola de prioridad, y cada operación cuesta $O(\log V)$ porque la estructura mantiene a lo más $V$ vértices. Por tanto, la complejidad total es $O(E \log V)$.\\
+
+Complejidad Espacial: La lista de adyacencia requiere $O(V + E)$ espacio, y las estructuras auxiliares del algoritmo (visitados, padres y cola de prioridad) usan $O(V)$ adicional. En total, el uso de memoria es $O(V + E)$.
+
+\newpage
+\subsection{Dijkstra}
+Dado un grafo con pesos no negativos, encuentra el camino mas corto desde un nodo origen a todos los demas nodos.
+
+\begin{lstlisting}
+struct Arista {
+    int destino;
+    long long peso;
+};
+
+struct Nodo {
+    int vertice;
+    long long distancia;
+    bool operator>(const Nodo& otro) const {
+        return distancia > otro.distancia;
+    }
+};
+
+pair<vector<long long>, vector<int>> dijkstra(int n, vector<vector<Arista>>& grafo, int inicio) {
+    vector<long long> dist(n, LLONG_MAX);
+    vector<int> padre(n, -1);
+    vector<bool> visitado(n, false);
+    priority_queue<Nodo, vector<Nodo>, greater<Nodo>> pq;
+    
+    dist[inicio] = 0;
+    pq.push({inicio, 0});
+    
+    while (!pq.empty()) {
+        Nodo actual = pq.top();
+        pq.pop();
+        
+        int u = actual.vertice;
+        if (visitado[u]) continue;
+        visitado[u] = true;
+        
+        for (const Arista& e : grafo[u]) {
+            int v = e.destino;
+            long long peso = e.peso;
+            
+            if (dist[u] + peso < dist[v]) {
+                dist[v] = dist[u] + peso;
+                padre[v] = u;
+                pq.push({v, dist[v]});
+            }
+        }
+    }
+    return {dist, padre};
+}
+\end{lstlisting}
+\newpage
+\begin{lstlisting}
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    
+    int n, m, inicio;
+    cin >> n >> m >> inicio;
+    
+    vector<vector<Arista>> grafo(n);
+    
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        long long w;
+        cin >> u >> v >> w;
+        grafo[u].push_back({v, w});
+    }
+    
+    auto [dist, padre] = dijkstra(n, grafo, inicio);
+    
+    for (int i = 0; i < n; i++) {
+        if (dist[i] == LLONG_MAX) {
+            cout << inicio << " -> " << i << ": INF" << endl;
+        } else {
+            cout << inicio << " -> " << i << ": " << dist[i] << " [";
+            vector<int> camino;
+            for (int v = i; v != -1; v = padre[v]) camino.push_back(v);
+            reverse(camino.begin(), camino.end());
+            for (int j = 0; j < camino.size(); j++) {
+                cout << camino[j];
+                if (j < camino.size() - 1) cout << " -> ";
+            }
+            cout << "]" << endl;
+        }
+    }
+    return 0;
+}
+\end{lstlisting}
+
+Complejidad temporal: $O((V + E)\log V)$, debido a que cada vértice se extrae a lo más una vez desde la cola de prioridad, y cada extracción cuesta $O(\log V)$. Ademas cada arista puede relajar una vez, produciendo una inserción en la cola de prioridad, también de costo $O(\log V)$. \\
+
+Complejidad espacial: $O(V + E)$, ya que se almacenan las listas de adyacencia del grafo ($E$) y las estructuras auxiliares como distancias, visitados y padres ($V$).
+
+\newpage
+
+\subsection{Bellman Ford}
+Encuentra el camino mas corto desde un nodo origen a un nodo destino, incluso si el grafo tiene aristas con pesos negativos. Detecta ciclos negativos.
+
+\begin{lstlisting}
+void bellmanFord(const vector<vector<int>>& aristas, int n, int inicio, int fin) {
+    vector<int> dist(n, INT_MAX);
+    vector<int> pred(n, -1);
+    dist[inicio] = 0;
+    
+    // Optimizacion: detener si no hay cambios
+    bool cambio = true;
+    for (int i = 0; i < n - 1 && cambio; i++) {
+        cambio = false;
+        for (const auto& e : aristas) {
+            if (dist[e[0]] != INT_MAX && dist[e[0]] + e[2] < dist[e[1]]) {
+                dist[e[1]] = dist[e[0]] + e[2];
+                pred[e[1]] = e[0];
+                cambio = true;
+            }
+        }
+    }
+    
+    // Verificar ciclo negativo
+    for (const auto& e : aristas) {
+        if (dist[e[0]] != INT_MAX && dist[e[0]] + e[2] < dist[e[1]]) {
+            cout << "\nERROR: Ciclo negativo detectado\n";
+            return;
+        }
+    }
+    
+    if (dist[fin] == INT_MAX) {
+        cout << "\nNo existe camino de " << inicio << " a " << fin << "\n";
+        return;
+    }
+    
+    // Reconstruir camino
+    vector<int> camino;
+    for (int v = fin; v != -1; v = pred[v])
+        camino.push_back(v);
+    
+    cout << "\n==============================================\n";
+    cout << "Nodo " << inicio << " -> Nodo " << fin << "\n";
+    cout << "==============================================\n";
+    cout << "Costo: " << dist[fin] << "\n";
+    cout << "Camino: ";
+    for (int i = camino.size() - 1; i >= 0; i--) {
+        cout << camino[i];
+        if (i > 0) cout << " -> ";
+    }
+    cout << "\n==============================================\n\n";
+}
+\end{lstlisting}
+\newpage
+\begin{lstlisting}
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    
+    int n, m, inicio;
+    cin >> n >> m >> inicio;
+    
+    vector<vector<int>> aristas;
+    for (int i = 0; i < m; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        aristas.push_back({u, v, w});
+    }
+    
+    vector<int> dist(n, INT_MAX);
+    vector<int> pred(n, -1);
+    dist[inicio] = 0;
+    
+    // Relajar aristas V-1 veces
+    for (int i = 0; i < n - 1; i++) {
+        for (const auto& e : aristas) {
+            if (dist[e[0]] != INT_MAX && dist[e[0]] + e[2] < dist[e[1]]) {
+                dist[e[1]] = dist[e[0]] + e[2];
+                pred[e[1]] = e[0];
+            }
+        }
+    }
+    
+    // Detectar ciclo negativo
+    for (const auto& e : aristas) {
+        if (dist[e[0]] != INT_MAX && dist[e[0]] + e[2] < dist[e[1]]) {
+            cout << "\n CICLO NEGATIVO DETECTADO" << endl;
+            cout << "Arista problema: " << e[0] << " -> " << e[1] << " (peso: " << e[2] << ")" << endl;
+            return 0;
+        }
+    }
+    
+    for (int i = 0; i < n; i++) {
+        if (dist[i] == INT_MAX) {
+            cout << inicio << " -> " << i << ": INF" << endl;
+        } else {
+            cout << inicio << " -> " << i << ": " << dist[i] << " [";
+            vector<int> camino;
+            for (int v = i; v != -1; v = pred[v]) camino.push_back(v);
+            reverse(camino.begin(), camino.end());
+            for (int j = 0; j < camino.size(); j++) {
+                cout << camino[j];
+                if (j < camino.size() - 1) cout << " -> ";
+            }
+            cout << "]" << endl;
+        }
+    }
+    return 0;
+}
+\end{lstlisting}
+
+\newpage
 
 \subsection{Problema de Scheduling}
 Se te da una lista de actividades $(s_1, e_1), \ldots, (s_n, e_n)$ denotadas por sus tiempos de inicio y finalizacion. Todas las actividades son igualmente atractivas para ti, y deseas maximizar el numero de actividades que realizas. \\
@@ -213,10 +541,11 @@ string encode(const string &text,
 \end{lstlisting}
 \end{multicols}
 
+\newpage
 \subsubsection*{Decodificación}
 
 \begin{lstlisting}
-string decode(Node* root, const string &encoded) {
+string decode(Node* root, const string &encoded) { // T:O(n) S:O(1)
     string result;
     Node* curr = root;
 

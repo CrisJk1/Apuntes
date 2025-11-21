@@ -1,4 +1,3 @@
-\newpage
 \section{Backtracking y fuerza bruta}
 
 \subsection{Fuerza Bruta (Brute Force)}
@@ -152,6 +151,7 @@ bool backtrack(Estado actual, Solucion parcial) {
 }
 \end{lstlisting}
 
+\newpage
 \subsection{Prefiprimos}
 Se busca contar la cantidad de números de tres dígitos, de forma que cumplen que cada prefijo es también un número primo.
 
@@ -185,6 +185,7 @@ int prefiprimo(){ // Enfoque backtracking
 }
 \end{lstlisting}
 
+\newpage
 \subsection{N-queens}
 El problema de las N-Reinas consiste en colocar N reinas en un tablero de ajedrez de N*N casillas, de tal manera que ninguna reina pueda atacar a otra.
 
@@ -240,7 +241,9 @@ void backtrack(vector<int>& reinas,
         }
     }
 }
-
+\end{lstlisting}
+\newpage
+\begin{lstlisting}
 int main(){
     int n;
     cin >> n;

@@ -57,6 +57,8 @@ s.front() = 't';                    // s = "texto"
 s.back() = 's';                     // s = "textos"
 \end{lstlisting}
 
+\newpage
+
 \subsubsection{Tamaño: \texttt{size()}, \texttt{length()} y \texttt{empty()}}
 \begin{lstlisting}
 string s = "Hola";
@@ -99,6 +101,8 @@ string s = "Hola Mundo";
 s.replace(5, 5, "Amigo");           // "Hola Amigo" (desde pos 5, 5 chars)
 s.replace(0, 4, "Adios");           // "Adios Amigo"
 \end{lstlisting}
+
+\columnbreak
 
 \subsubsection{Buscar texto: \texttt{find()}}
 \begin{lstlisting}
@@ -145,6 +149,7 @@ string sub2 = s.substr(0, 4);       // "Hola" (desde pos 0, 4 chars)
 string sub3 = s.substr(5, 3);       // "Mun"
 \end{lstlisting}
 
+\newpage
 
 \subsubsection{Comparación: \texttt{compare()} y operadores}
 \begin{lstlisting}
@@ -203,6 +208,7 @@ try {
 }
 \end{lstlisting}
 
+\columnbreak
 
 \subsubsection{Recorrer string}
 \begin{lstlisting}
@@ -260,6 +266,7 @@ s.erase(find_if(s.rbegin(), s.rend(), [](unsigned char c) {
 // s = "Hola Mundo"
 \end{lstlisting}
 
+\newpage
 
 \subsubsection{Dividir string (split)}
 \begin{lstlisting}

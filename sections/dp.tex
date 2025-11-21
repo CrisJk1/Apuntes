@@ -1,7 +1,6 @@
-\newpage
-\section{Programación Dinámica (DP)}
+\section{Programacion Dinamica (DP)}
 
-\subsection{Introducción}
+\subsection{Introduccion}
 Es una tecnica algoritmica que divide problemas complejos en subproblemas mas simples. La idea es construir soluciones paso a paso, usando resultados de calculos anteriores.
 
 \subsubsection{Metodologia}
@@ -33,7 +32,7 @@ long long fib(int n){
 \end{lstlisting}
 
 \subsubsection{Tabulation}
-Tabulation construye la solución desde los casos base hacia arriba, sin recursión. Es mas eficiente en memoria.
+Tabulation construye la solucion desde los casos base hacia arriba, sin recursion. Es mas eficiente en memoria.
 \begin{lstlisting}
 long long fib(int n){
     if(n <= 1) return n;
@@ -71,6 +70,8 @@ int mwis(vector<int> &arr){
 \end{lstlisting}
 Complejidad Temporal: \(O(n)\)\\
 Complejidad Espacial: \(O(n)\)
+
+\newpage
 
 \subsection{Knapsack 0/1}
 Tienes una mochila con capacidad $W$ y $n$ objetos, cada uno con peso $w[i]$ y valor $v[i]$. Maximiza el valor sin exceder la capacidad.
@@ -135,6 +136,251 @@ int coinChange(vector<int>& coins, int amount) {
 Complejidad Temporal: \(O(nS)\)\\
 Complejidad Espacial: \(O(S)\)
 
-\subsection{Algoritmo de Needleman-Wunsch}
+\newpage
 
-\subsection{OptimalBST}
+\subsection{Algoritmo de Needleman-Wunsch}
+Alinea dos secuencias para maximizar la puntuacion de alineacion basada en coincidencias (match), desajustes(mismatch) y espacios(gap).
+
+\begin{lstlisting}
+struct AlignmentResult {
+    int score;
+    string A_aligned;
+    string B_aligned;
+};
+
+// Needleman-Wunsch: global alignment
+AlignmentResult needlemanWunsch(const string &A, const string &B,
+                                int match = 1, int mismatch = -1, int gap = -1) {
+    int n = A.size();
+    int m = B.size();
+
+    // DP matrix
+    vector<vector<int>> dp(n+1, vector<int>(m+1));
+
+    // Build DP base cases
+    for(int i = 0; i <= n; i++) dp[i][0] = i * gap;
+    for(int j = 0; j <= m; j++) dp[0][j] = j * gap;
+
+    // Fill DP matrix
+    for(int i = 1; i <= n; i++) {
+        for(int j = 1; j <= m; j++) {
+            int score_diag = dp[i-1][j-1] + (A[i-1] == B[j-1] ? match : mismatch);
+            int score_up   = dp[i-1][j] + gap;
+            int score_left = dp[i][j-1] + gap;
+
+            dp[i][j] = max({score_diag, score_up, score_left});
+        }
+    }
+
+    // --- Reconstruction ---
+    string A_al, B_al;
+    int i = n, j = m;
+
+    while(i > 0 || j > 0) {
+        if(i > 0 && j > 0 &&
+           dp[i][j] == dp[i-1][j-1] + (A[i-1] == B[j-1] ? match : mismatch)) {
+            A_al.push_back(A[i-1]);
+            B_al.push_back(B[j-1]);
+            i--; j--;
+        }
+        else if(i > 0 && dp[i][j] == dp[i-1][j] + gap) {
+            A_al.push_back(A[i-1]);
+            B_al.push_back('-');
+            i--;
+        }
+        else { // j > 0
+            A_al.push_back('-');
+            B_al.push_back(B[j-1]);
+            j--;
+        }
+    }
+
+    reverse(A_al.begin(), A_al.end());
+    reverse(B_al.begin(), B_al.end());
+
+    return { dp[n][m], A_al, B_al };
+}
+\end{lstlisting}
+\newpage
+\begin{lstlisting}
+int main() {
+    string A, B;
+    cin >> A >> B;
+
+    auto res = needlemanWunsch(A, B);
+    cout << "Score: " << res.score << endl;
+    if (res.A_aligned.size() > 0) {
+        cout << "Alineamiento:" << endl;
+        cout << res.A_aligned << endl;
+        cout << res.B_aligned << endl;
+    }
+    return 0;
+}
+\end{lstlisting}
+\textbf{Complejidad Temporal:} \(O(nm)\).  
+La matriz dp tiene tamaño \((n+1)(m+1)\) y cada celda se calcula en tiempo constante considerando tres valores vecinos (\textit{diag, up, left}). Por ello, el tiempo total es proporcional al número de celdas.
+
+\textbf{Complejidad Espacial:} \(O(nm)\).  
+Se almacena la matriz completa \(dp\) de \((n+1)(m+1)\) enteros. El alineamiento reconstruido usa \(O(n+m)\), pero no supera el costo de la matriz, por lo que domina \(O(nm)\).
+
+
+\subsection{Optimal BST}
+El problema consiste en construir un arbol binario de búsqueda optimo a partir de un conjunto de n claves ordenadas y sus probabilidades de búsqueda y sus probabilidades de fallar entre ellas. El objetivo es minimizar el costo esperado de las búsquedas en el arbol.
+
+\begin{lstlisting}
+/*
+    keys[1..n] : claves en orden
+    p[i]       : probabilidad de buscar Ki
+    q[i]       : probabilidad de fallar entre Ki-1 y Ki
+*/
+
+struct OBST_Result {
+    double cost;                      // costo optimo total
+    vector<vector<int>> root;         // matriz de raices optimas
+    vector<vector<double>> dp_cost;   // matriz e[i][j]
+};
+
+OBST_Result optimalBST(const vector<string>& keys,
+                       const vector<double>& p,
+                       const vector<double>& q)
+{
+    int n = keys.size() - 1; // keys usa indices 1..n
+
+    vector<vector<double>> e(n+2, vector<double>(n+2));
+    vector<vector<double>> w(n+2, vector<double>(n+2));
+    vector<vector<int>> root(n+2, vector<int>(n+2));
+
+    // Inicializacion
+    for (int i = 1; i <= n+1; i++) {
+        e[i][i-1] = q[i-1];
+        w[i][i-1] = q[i-1];
+    }
+
+    // DP por longitud
+    for (int length = 1; length <= n; length++) {
+        for (int i = 1; i <= n - length + 1; i++) {
+            int j = i + length - 1;
+            e[i][j] = 1e18;
+
+            w[i][j] = w[i][j-1] + p[j] + q[j];
+
+            // Probar cada posible raiz r
+            for (int r = i; r <= j; r++) {
+                double cost = e[i][r-1] + e[r+1][j] + w[i][j];
+                if (cost < e[i][j]) {
+                    e[i][j] = cost;
+                    root[i][j] = r;
+                }
+            }
+        }
+    }
+    return { e[1][n], root, e };
+}
+\end{lstlisting}
+\begin{lstlisting}
+int main() {
+    int n;
+    cin >> n;
+
+    vector<string> keys(n+1);
+    vector<double> p(n+1), q(n+1);
+
+    for (int i = 1; i <= n; i++)
+        cin >> keys[i];
+
+    for (int i = 1; i <= n; i++)
+        cin >> p[i];
+
+    for (int i = 0; i <= n; i++)
+        cin >> q[i];
+
+    OBST_Result res = optimalBST(keys, p, q);
+
+    // Informacion esencial
+    cout << "Costo optimo del OBST: " << res.cost << "\n";
+
+    // Tabla root:
+    /*
+    for (int i = 1; i <= n; i++) {
+        for (int j = i; j <= n; j++)
+            cout << "root[" << i << "][" << j << "] = " << res.root[i][j] << "\n";
+    }
+    */
+
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{Complejidad Temporal:} \(O(n^3)\).
+El algoritmo utiliza tres bucles anidados: el primero itera sobre la longitud de los subarboles, el segundo sobre el índice inicial \(i\) y el tercero sobre las posibles raíces \(r\). Cada uno de estos bucles tiene una complejidad lineal en \(n\), lo que da como resultado una complejidad total de \(O(n^3)\).\\
+
+\textbf{Complejidad Espacial:} \(O(n^2)\).
+El algoritmo utiliza tres matrices \(e\), \(w\) y \(root\), cada una de tamaño \((n+2) \times (n+2)\). Por lo tanto, la complejidad espacial total es \(O(n^2)\).
+
+\newpage
+
+\subsection{Problema del vendedor viajero}
+Dado un conjunto de ciudades y las distancias entre ellas, encontrar la ruta mas corta que visite cada ciudad exactamente una vez y regrese a la ciudad de origen.
+
+\begin{lstlisting}
+const long long INF = 1e18;
+
+// TSP Held-Karp: dp[mask][i]
+long long tsp_held_karp(const vector<vector<long long>>& dist) {
+    int n = dist.size();
+    int N = 1 << n;
+
+    vector<vector<long long>> dp(N, vector<long long>(n, INF));
+
+    // Caso base: iniciar en ciudad 0
+    dp[1][0] = 0; // mask = 1<<0 = 1
+
+    // DP sobre subconjuntos
+    for (int mask = 1; mask < N; mask++) {
+        for (int u = 0; u < n; u++) {
+            if (!(mask & (1 << u))) continue; // u no esta en el subconjunto
+
+            long long curr = dp[mask][u];
+            if (curr == INF) continue;
+
+            // Intentar ir a un nuevo nodo v
+            for (int v = 0; v < n; v++) {
+                if (mask & (1 << v)) continue; // v ya esta visitado
+
+                int newMask = mask | (1 << v);
+                dp[newMask][v] = min(dp[newMask][v], curr + dist[u][v]);
+            }
+        }
+    }
+
+    // Cerrar el ciclo volviendo a 0
+    long long ans = INF;
+    int fullMask = N - 1;
+
+    for (int u = 1; u < n; u++) {
+        ans = min(ans, dp[fullMask][u] + dist[u][0]);
+    }
+
+    return ans;
+}
+\end{lstlisting}
+\begin{lstlisting}
+
+int main() {
+    int n;
+    cin >> n;
+
+    vector<vector<long long>> dist(n, vector<long long>(n));
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            cin >> dist[i][j];
+
+    cout << "Costo minimo del tour: " << tsp_held_karp(dist) << "\n";
+}
+\end{lstlisting}
+
+\textbf{Complejidad Temporal:} \(O(n^2 \cdot 2^n)\).
+El algoritmo utiliza una tabla DP de tamaño \(2^n \times n\), donde \(n\) es el número de ciudades. Para cada subconjunto de ciudades (representado por \(mask\)), se itera sobre todas las ciudades \(u\) en el subconjunto y luego sobre todas las ciudades \(v\) que no están en el subconjunto. Esto da lugar a una complejidad total de \(O(n^2 \cdot 2^n)\).\\
+
+\textbf{Complejidad Espacial:} \(O(n \cdot 2^n)\).
+El algoritmo utiliza una tabla DP de tamaño \(2^n \times n\) para almacenar los costos mínimos para cada subconjunto de ciudades y cada ciudad final. Por lo tanto, la complejidad espacial es \(O(n \cdot 2^n)\).
